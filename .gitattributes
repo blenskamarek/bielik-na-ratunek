@@ -4,3 +4,4 @@
 *.php text eol=lf
 *.py text eol=lf
 *.pdf binary
+*.sh text eol=lf
