@@ -485,8 +485,8 @@ class TestPrzykladyOrganizatora(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             wy, rap = Path(tmp) / "out" / "x.json", Path(tmp) / "raport" / "x.json"
             przetworz_plik(SZABLON / "negatywny przyklad.pdf", wy, wczytaj_typy(), rap)
-            self.assertTrue(wy.exists())                # README UZP: "pusty plik .json"
-            self.assertEqual(wy.stat().st_size, 0)
+            self.assertTrue(wy.exists())                # organizator: "pusty z {}"
+            self.assertEqual(wy.read_text(encoding="utf-8"), "{}")
             self.assertIn("nierozpoznany", json.loads(rap.read_text(encoding="utf-8"))["uwaga"])
 
     def test_skan_bez_ocr_nie_przerywa_pracy(self):
@@ -565,9 +565,9 @@ class TestRegresjaNaDanych(unittest.TestCase):
             if wzorzec.exists():                      # typ oczekiwany = klucz główny wzorca
                 oczek = (set(json.loads(wzorzec.read_text(encoding="utf-8"))) & klucz).pop()
                 self.assertIn(oczek, json.loads(plik.read_text(encoding="utf-8")), str(pdf))
-            else:                                     # dokument negatywny UZP: pusty plik .json
+            else:                                     # dokument negatywny UZP: plik .json z "{}"
                 negatywy += 1
-                self.assertEqual(plik.read_text(encoding="utf-8"), "", str(pdf))
+                self.assertEqual(plik.read_text(encoding="utf-8"), "{}", str(pdf))
         if (DANE / "negatywne").is_dir():
             self.assertGreater(negatywy, 0)
 

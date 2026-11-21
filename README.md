@@ -33,17 +33,18 @@ input/                            output/
 │   ├── odwolanie_nr_1.pdf        │   ├── odwolanie_nr_1.json
 │   ├── pelnomocnictwo_nr_1.pdf   │   ├── pelnomocnictwo_nr_1.json
 │   ├── przelew_nr_1.pdf          │   ├── przelew_nr_1.json
-│   └── inny_dokument.pdf         │   └── inny_dokument.json      <- pusty plik: dokument spoza trzech typów
+│   └── inny_dokument.pdf         │   └── inny_dokument.json      <- {}: dokument spoza trzech typów
 ```
 
 Nazwa JSON-a = nazwa PDF-a. Typ dokumentu jest rozpoznawany po treści, nie po nazwie pliku. Dokumenty spoza
-trzech typów (wyroki i postanowienia KIO, decyzje, ogłoszenia TED, inne pisma) dają pusty plik `.json`.
+trzech typów (wyroki i postanowienia KIO, decyzje, ogłoszenia TED, inne pisma) dają plik `.json` z pustym obiektem `{}`
+(odpowiedź organizatora: „pusty z {}”; `PUSTY_WYNIK=zero` zapisuje zamiast tego plik o długości 0).
 
 ## Jak to działa
 
 ```
 PDF ─▶ tekst (pypdf) ─▶ OCR stron bez tekstu (Tesseract, pol)
-    ─▶ klasyfikacja po treści i budowie pisma (typy/*/typ.yaml)  ── obcy dokument ──▶ pusty .json
+    ─▶ klasyfikacja po treści i budowie pisma (typy/*/typ.yaml)  ── obcy dokument ──▶ {}
     ─▶ reguły z konfiguracji YAML (sekcje, regex, bloki stron, słowniki)
     ─▶ Bielik 11B tylko dla pól pustych po regułach ─▶ weryfikacja każdej wartości w tekście
     ─▶ JSON (+ opcjonalny raport: co podał model, co przyjęto, dlaczego odrzucono)
@@ -88,7 +89,7 @@ wypełniają większość pól bez modelu. Szczegóły i konfiguracja: [docs/ZDA
 | F1 na skanach odłożonych z modelem Bielik 11B | 0,810 |
 | Realne odwołanie UZP (skan z zaczernieniami, `szablon-aplikacja`; wzorcowy JSON pusty – sprawdzone ręcznie), same reguły | 11 z 12 widocznych pól (wcześniej 5) |
 | Warianty układu nagłówka (etykieta pod danymi / adres bez „ul.” / nazwa i adres w jednej linii; z 60 dokumentów tekstowych) | 1,000 / 0,996 / 1,000 (wcześniej 0,61 / 0,59 / 0,63) |
-| Dokumenty negatywne UZP (16) | 16/16 pusty plik |
+| Dokumenty negatywne UZP (16) | 16/16 `{}` |
 | Klasyfikacja (180 tekstowych + 30 skanów + realny skan UZP; 16 negatywów) | 211/211, 16/16 |
 | Czas: 196 PDF-ów tekstowych, same reguły | ~9 s |
 

@@ -204,11 +204,11 @@ def przetworz_plik(pdf: Path, wyjscie: Path, typy: dict[str, Typ], raport: Path 
         info["typ"] = typ
         log.info("%s -> %s", pdf.name, typ)
         if not typ:
-            # dokument spoza znanych typów (README UZP: "powinny zwrócić pusty plik .json"):
-            # domyślnie plik o długości 0; PUSTY_WYNIK=obiekt zapisuje "{}"
-            info["uwaga"] = "nierozpoznany typ dokumentu - pusty plik wynikowy"
+            # dokument spoza znanych typów: plik .json z pustym obiektem "{}" (odpowiedź organizatora
+            # na Discordzie: "pusty z {}"); PUSTY_WYNIK=zero zapisuje plik o długości 0
+            info["uwaga"] = "nierozpoznany typ dokumentu - pusty wynik {}"
             wyjscie.parent.mkdir(parents=True, exist_ok=True)
-            wyjscie.write_text("{}" if os.environ.get("PUSTY_WYNIK") == "obiekt" else "", encoding="utf-8")
+            wyjscie.write_text("" if os.environ.get("PUSTY_WYNIK") == "zero" else "{}", encoding="utf-8")
             if raport is not None:
                 raport.parent.mkdir(parents=True, exist_ok=True)
                 raport.write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
