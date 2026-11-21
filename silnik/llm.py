@@ -77,6 +77,13 @@ def konfiguracja() -> dict | None:
     k["adres"] = os.environ.get("LLM_ADRES", k.get("adres", "")).rstrip("/")
     k["tryb"] = os.environ.get("LLM_TRYB", k.get("tryb", "api"))
     k["model"] = os.environ.get("LLM_MODEL", k.get("model", ""))
+    if k["tryb"] == "kolejka" and not _klucz(k):
+        # bez klucza kolejka i tak odrzuci zapytania (401) - nie łączymy się wcale
+        if not _stan.get("brak_klucza_zgloszony"):
+            _stan["brak_klucza_zgloszony"] = True
+            log.warning("LLM: brak klucza - wpisz klucz z formularza zgłoszeniowego do pliku llm.klucz "
+                        "(obok run.bat); dalej same reguły i OCR")
+        return None
     return k
 
 
@@ -238,13 +245,21 @@ def _prompt(konf_typu: dict, pola: dict, fragment: str) -> list[dict]:
 
 # ----------------------------------------------------------------------------- wywołanie API
 def _klucz(k: dict) -> str:
-    """Klucz API: zmienna środowiskowa (pierwszeństwo) albo plik (domyślnie llm.klucz, poza gitem)."""
+    """Klucz API, kolejno: zmienna środowiskowa, plik lokalny (llm.klucz.lokalny, poza gitem),
+    plik llm.klucz (w repozytorium jest w nim tylko tekst-wzór, np. "tutaj wpisz klucz").
+    Wzór albo tekst ze spacjami nie jest kluczem -> zwracamy pusty napis."""
     klucz = os.environ.get(k.get("klucz_zmienna", "LLM_API_KEY"), "").strip()
-    if not klucz:
-        plik = KATALOG / k.get("klucz_plik", "llm.klucz")
+    for nazwa in (k.get("klucz_plik_lokalny", "llm.klucz.lokalny"), k.get("klucz_plik", "llm.klucz")):
+        if klucz:
+            break
+        plik = KATALOG / nazwa
         tekst = plik.read_text(encoding="utf-8-sig").strip() if plik.exists() else ""
         klucz = tekst.splitlines()[0].strip() if tekst else ""
-    return klucz
+    return "" if _to_wzor_klucza(klucz) else klucz
+
+
+def _to_wzor_klucza(klucz: str) -> bool:
+    return bool(klucz) and (bool(re.search(r"\s", klucz)) or klucz.casefold().startswith(("tutaj", "wpisz")))
 
 
 class _BladModelu(Exception):

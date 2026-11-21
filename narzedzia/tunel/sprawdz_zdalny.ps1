@@ -17,7 +17,7 @@ $root = (Resolve-Path "$PSScriptRoot\..\..").Path
 $kolejka = $Adres -match "kolejka\.php$"
 if ($kolejka) {
     $baza = $Adres; $urlZdrowie = "$Adres`?a=zdrowie"; $urlZadanie = "$Adres`?a=zadanie"; $adresLLM = $Adres
-    if (-not $KluczPlik) { $KluczPlik = Join-Path $root "llm.klucz" }            # klucz klienta (jak u sędziego)
+    if (-not $KluczPlik) { $KluczPlik = Join-Path $root "llm.klucz.lokalny" }    # klucz klienta (u sędziego: llm.klucz)
 } else {
     $baza = $Adres.TrimEnd("/") -replace "/v1$", ""
     $urlZdrowie = "$baza/zdrowie"; $urlZadanie = "$baza/v1/chat/completions"; $adresLLM = "$baza/v1"

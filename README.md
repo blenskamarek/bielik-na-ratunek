@@ -19,9 +19,9 @@ pip install -r requirements.txt
 run.bat                       # albo: start.bat, albo: python run.py --wejscie input --wyjscie output
 ```
 
-Model językowy jest używany przez API (patrz niżej) i wymaga pliku **`llm.klucz`** obok `run.bat`
-(przekazywany organizatorom osobno, nie ma go w repozytorium). Bez klucza lub bez połączenia program działa
-na samych regułach i OCR.
+Model językowy jest używany przez API (patrz niżej). **Klucz API: wpisz klucz podany w formularzu zgłoszeniowym
+do pliku `llm.klucz`** (obok `run.bat`; w repozytorium plik zawiera tylko tekst `tutaj wpisz klucz`).
+Bez klucza lub bez połączenia program działa na samych regułach i OCR (w logu pojawi się informacja o braku klucza).
 
 Opcje: `--raport KATALOG` (raport przejrzystości), `--bez-llm`, `--bez-ocr`.
 

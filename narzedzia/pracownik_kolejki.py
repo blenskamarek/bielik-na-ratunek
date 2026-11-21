@@ -4,7 +4,7 @@ Tylko połączenia WYCHODZĄCE (HTTPS do hostingu) - komputer z modelem nie przy
 Pętla: GET ?a=nastepne -> zapytanie do lokalnej Ollamy (model wymuszony) -> POST ?a=odpowiedz.
 
 Użycie:
-  py narzedzia\pracownik_kolejki.py --nowe-klucze          # klucze do kolejka_konfig.php i llm.klucz
+  py narzedzia\pracownik_kolejki.py --nowe-klucze          # klucze do kolejka_konfig.php i llm.klucz.lokalny
   py narzedzia\pracownik_kolejki.py --adres https://bielik.kowale.edu.pl/kolejka.php
 Logi zawierają tylko metadane (id, czas, tokeny) - bez treści dokumentów.
 """
@@ -47,9 +47,10 @@ def _http(metoda: str, url: str, klucz: str | None = None, dane: dict | None = N
 
 def nowe_klucze() -> None:
     kk, kp = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
-    (ROOT / "llm.klucz").write_text(kk + "\n", encoding="utf-8")
+    (ROOT / "llm.klucz.lokalny").write_text(kk + "\n", encoding="utf-8")   # poza gitem; sędzia wpisuje go do llm.klucz
     (KATALOG / "pracownik.klucz").write_text(kp + "\n", encoding="utf-8")
-    print("Zapisano: llm.klucz (klucz klienta - dla programu sędziego) i narzedzia/pracownik.klucz.")
+    print("Zapisano: llm.klucz.lokalny (klucz klienta - podaj go w formularzu; sędzia wpisze go do llm.klucz)")
+    print("i narzedzia/pracownik.klucz (zostaje na komputerze z Bielikiem).")
     print("Do serwer_kolejki/kolejka_konfig.php na hostingu wpisz:")
     print(f"    'klucz_klienta' => '{kk}',\n    'klucz_pracownika' => '{kp}',")
 

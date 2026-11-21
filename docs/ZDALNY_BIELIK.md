@@ -34,7 +34,7 @@ brak pracownika (wyłączenie w < 5 s) i zły klucz (`tests/test_podstawy.py`, k
    ```powershell
    py narzedzia\pracownik_kolejki.py --nowe-klucze
    ```
-   Zapisuje `llm.klucz` (klucz klienta – dla programu sędziego) i `narzedzia\pracownik.klucz`
+   Zapisuje `llm.klucz.lokalny` (klucz klienta – podawany w formularzu zgłoszeniowym) i `narzedzia\pracownik.klucz`
    (zostaje u nas) oraz wypisuje dwie linie do konfiguracji PHP. Oba pliki są poza gitem.
 2. **Panel cal.pl:** subdomena `bielik.kowale.edu.pl`, certyfikat SSL (Let's Encrypt), PHP 7.0+ (najlepiej 8.x).
 3. **Wgranie plików** (FTP / menedżer plików) do katalogu subdomeny:
@@ -57,7 +57,9 @@ brak pracownika (wyłączenie w < 5 s) i zły klucz (`tests/test_podstawy.py`, k
    adres: https://bielik.kowale.edu.pl/kolejka.php
    kontekst_tokenow: 6144      # musi odpowiadać modelowi pracownika
    ```
-   Sędzia potrzebuje jeszcze pliku `llm.klucz` obok `run.bat` (albo zmiennej `LLM_API_KEY`).
+   W repozytorium `llm.klucz` zawiera tylko `tutaj wpisz klucz`; sędzia wpisuje w nim klucz z formularza
+   zgłoszeniowego (albo ustawia zmienną `LLM_API_KEY`). U nas klucz leży w `llm.klucz.lokalny` (poza gitem,
+   ma pierwszeństwo), więc repozytorium nigdy go nie zawiera.
    Do pracy lokalnej bez kolejki: `$env:LLM_TRYB="api"; $env:LLM_ADRES="http://localhost:11434/v1"`.
 
    Sprawdzone na domyślnej konfiguracji przez prawdziwy hosting (skan UZP, bez pamięci podręcznej):
@@ -95,7 +97,8 @@ nie zostawi plików bez wyniku.
 ## Przekazanie klucza – do uzgodnienia z organizatorem
 
 FAQ: rozwiązanie „powinno zawierać klucz API”, a repozytorium na GitHubie jest publiczne.
-- **Zalecane:** `llm.klucz` osobnym kanałem (formularz zgłoszenia / e-mail do organizatora).
+- **Wybrane:** klucz w formularzu zgłoszeniowym; w repozytorium plik `llm.klucz` z tekstem `tutaj wpisz klucz`.
+  Program rozpoznaje ten tekst i bez prawdziwego klucza od razu działa na samych regułach (bez łączenia się z hostingiem).
 - **Jeśli wymagają klucza w repozytorium:** osobny klucz tylko na czas oceny, wymieniany zaraz po niej.
   Klucz klienta pozwala tylko wrzucać zadania i odbierać wyniki (nie pobierze cudzych zadań).
 

@@ -300,6 +300,29 @@ class TestLLM(unittest.TestCase):
         finally:
             llm._stan.update({"wylaczony_po_bledzie": False, "bledy_z_rzedu": 0})
 
+    def test_wzor_klucza_nie_jest_kluczem_i_wylacza_kolejke(self):
+        from unittest import mock
+        from silnik import llm
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "llm.klucz").write_text("tutaj wpisz klucz\n", encoding="utf-8")
+            k = {"klucz_zmienna": "TEST_KLUCZ_BRAK", "klucz_plik": "llm.klucz", "klucz_plik_lokalny": "llm.klucz.lokalny"}
+            with mock.patch.object(llm, "KATALOG", Path(tmp)):
+                self.assertEqual(llm._klucz(k), "")                         # wzór z repozytorium
+                (Path(tmp) / "llm.klucz.lokalny").write_text("prawdziwy-klucz\n", encoding="utf-8")
+                self.assertEqual(llm._klucz(k), "prawdziwy-klucz")          # plik lokalny ma pierwszeństwo
+        # tryb kolejki bez klucza: konfiguracja None (bez łączenia się z hostingiem)
+        stan = dict(llm._stan)
+        try:
+            with mock.patch.object(llm, "_klucz", return_value=""), \
+                    mock.patch.dict(os.environ, {"LLM_TRYB": "kolejka"}):
+                self.assertIsNone(llm.konfiguracja())
+        finally:
+            llm._stan.clear()
+            llm._stan.update(stan)
+
+    def test_repozytorium_zawiera_tylko_wzor_klucza(self):
+        self.assertEqual((ROOT / "llm.klucz").read_text(encoding="utf-8").strip(), "tutaj wpisz klucz")
+
     def test_klucz_ze_zmiennej_ma_pierwszenstwo_przed_plikiem(self):
         from silnik import llm
         with tempfile.TemporaryDirectory() as tmp:

@@ -6,7 +6,8 @@ wlaczony: true
 
 # USTAWIENIE DLA OCENY: Bielik 11B v3.1 (otwarty model, SpeakLeash) przez kolejkę na serwerze w Polsce
 # (cal.pl, bielik.kowale.edu.pl). Program sędziego tylko wysyła zadania i odbiera wyniki przez HTTPS;
-# model liczy pracownik na komputerze z GPU (docs/ZDALNY_BIELIK.md). Klucz: plik llm.klucz obok run.bat.
+# model liczy pracownik na komputerze z GPU (docs/ZDALNY_BIELIK.md). Klucz: plik llm.klucz obok run.bat
+# (w repozytorium zawiera tylko "tutaj wpisz klucz" - wpisz w nim klucz z formularza zgłoszeniowego).
 # Gdy pracownik nie działa, program wykrywa to w <= 20 s i pracuje na samych regułach + OCR.
 #
 # tryb: kolejka  -> adres = .../kolejka.php (serwer_kolejki/kolejka.php)
@@ -25,7 +26,8 @@ model: bielik-11b-6k
 
 # Klucz API: zmienna środowiskowa (pierwszeństwo) albo plik obok tego pliku (poza gitem).
 klucz_zmienna: LLM_API_KEY
-klucz_plik: llm.klucz
+klucz_plik: llm.klucz                 # u sędziego: klucz z formularza zgłoszeniowego
+klucz_plik_lokalny: llm.klucz.lokalny # u nas (poza gitem), ma pierwszeństwo
 
 temperatura: 0
 ziarno: 0

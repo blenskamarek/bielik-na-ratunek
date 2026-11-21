@@ -6,7 +6,7 @@ output/*
 raport/
 .env
 _stare/
-llm.klucz
+llm.klucz.lokalny
 narzedzia/bramka.klucz
 narzedzia/tunel/logi/
 serwer_kolejki/kolejka_konfig.php
@@ -19,3 +19,5 @@ PYTANIA_DO_MENTORA.md
 output_*/
 raport_*/
 .cache_tekst/
+!llm.klucz
+*.lokalny
