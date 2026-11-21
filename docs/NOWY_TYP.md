@@ -76,6 +76,10 @@ Makra w regexach: `{DATA}` (2026-03-21, 21.03.2026, 21/03/2026, 21 marca 2026), 
 `{RACHUNEK}` (NRB z PL i spacjami lub bez). Wielkość liter jest ignorowana; `(?-i:...)` włącza ją lokalnie
 (np. `(?-i:[A-ZŁ])` = tylko wielka litera).
 
+Uwaga: `{DATA}` ma własne grupy. Jeśli makro stoi w regexie **przed** grupą z wartością (np. w warunku
+`(?=...)`), „grupa 1” wskaże grupę daty. Wtedy nazwij swoją grupę i podaj ją w `grupa`:
+`regex: '\A(?=...{DATA}...)(?P<tresc>[\s\S]*)'` + `grupa: tresc`.
+
 ### `sekcje` – nazwane fragmenty dokumentu
 
 Pomocnicze fragmenty tekstu (nie trafiają do wyniku). Reguły pól i list wskazują je przez `w:`.
@@ -86,6 +90,24 @@ sekcje:
   naglowek: {regex: '\A([\s\S]*?)(?=^[ \t]*dotyczy\b|\Z)'}          # wszystko przed "dotyczy"
   odwolujacy: {w: naglowek, regex: '^[ \t]*Odwołujący\b[^\n]*\n([\s\S]*?)(?=^[ \t]*Zamawiający|\Z)'}
 ```
+
+**Sekcja warunkowa = inny układ dokumentu bez psucia dotychczasowego.** Sekcja, której regex nie pasuje,
+nie istnieje, a reguły z `w:` na nią po prostu nic nie znajdują. Tak `typy/odwolanie/typ.yaml` obsługuje
+układ „etykieta POD danymi strony” (dwie kolumny w prawdziwych odwołaniach): `naglowek_po` istnieje tylko,
+gdy nagłówek kończy się samotną etykietą. Alternatywa listy z `w: odwolujacy_po` stoi na pierwszym miejscu,
+a w zwykłym układzie wygrywa dawna reguła:
+
+```yaml
+listy:
+  Odwolujacy:
+    regex:
+      - {w: odwolujacy_po, regex: *blok_luzny}    # tylko w układzie "pod blokiem"
+      - {w: odwolujacy, regex: *blok_strony}      # zwykły układ
+      - {w: odwolujacy, regex: *blok_luzny}       # zwykły układ, ale adres bez "ul." / wszystko w jednej linii
+```
+
+Przed dodaniem takiej reguły sprawdź, że nie zmienia wyników na znanych dokumentach. Najprościej
+wygenerować warianty układu (np. przenieść etykiety, usunąć „ul.”) z dokumentów, które mają wzorce.
 
 ### `listy` – listy obiektów z reguł
 

@@ -214,6 +214,51 @@ class TestRdzen(unittest.TestCase):
         self.assertEqual(r.returncode, 2)
 
 
+class TestUkladyOdwolania(unittest.TestCase):
+    """Układy nagłówka spotykane w prawdziwych odwołaniach (teksty wymyślone, bez PDF)."""
+
+    ADRESAT = "Warszawa, dnia 16 czerwca 2025 r.\nPrezes Krajowej Izby Odwoławczej\nul. Postępu 17a\n02-676 Warszawa\n"
+    TRESC = ("Dotyczy: postępowania o udzielenie zamówienia publicznego pn. „Dostawa sprzętu” "
+             "(postępowanie nr ZP.1.2025)\nODWOŁANIE\nDziałając w imieniu wykonawcy „Alfa Beta” Spółka "
+             "z ograniczoną odpowiedzialnością, wnoszę odwołanie na czynności Zamawiającego, tj.: wobec treści\n"
+             "Specyfikacji Warunków Zamówienia (SWZ). Zamawiający zamieścił ogłoszenie wraz z dokumentami w dniu "
+             "10 czerwca 2025 r. Odwołanie jest wniesione w terminie.\n")
+
+    def _wynik(self, naglowek: str) -> dict:
+        typy = wczytaj_typy()
+        tekst = self.ADRESAT + naglowek + self.TRESC
+        self.assertEqual(klasyfikuj(tekst, typy), "odwolanie")
+        return typy["odwolanie"].wynik(tekst)
+
+    def test_etykieta_pod_blokiem(self):
+        # dwie kolumny w skanie: OCR czyta dane strony, potem etykietę; nazwa w nagłówku zaczerniona
+        w = self._wynik("|. BIE z ograniczona odpowiedzialnością\nKwiatowa 5, 00-001 Warszawa\n"
+                        "KRS: 0000123456, NIP: 1234567890\nreprezentowany przez radcę prawnego ij KA\n"
+                        "Odwołujący:\nGmina Przykładowo Wielkie Miasto Spółka z ograniczoną\nodpowiedzialnością\n"
+                        "Rynek 1, 00-002 Przykładowo\nZamawiający:\n")
+        o, z = w["Odwolujacy"][0], w["Zamawiajacy"][0]
+        self.assertEqual(o["nazwa"], "Alfa Beta Spółka z ograniczoną odpowiedzialnością")   # z treści
+        self.assertEqual((o["krs"], o["nip"], o["przez-pelnomocnika"]), ("0000123456", "1234567890", 1))
+        self.assertIsNone(o["pelnomocnik"]["imie_nazwisko"])
+        self.assertEqual(z["nazwa"], "Gmina Przykładowo Wielkie Miasto Spółka z ograniczoną odpowiedzialnością")
+        self.assertEqual(len(w["Zamawiajacy"]), 1)
+        self.assertEqual(w["OdwolanieKIO"]["czynnosc_powod_id"], 4)
+        self.assertEqual(w["OdwolanieKIO"]["czynnosc_dzien"], "2025-06-10")
+
+    def test_etykieta_nad_blokiem_bez_zamiany_stron(self):
+        # zwykły układ: nazwa z nagłówka (nie z treści), strony nie zamienione
+        w = self._wynik("Odwołujący:\nAlfa Beta sp. z o.o.\nul. Kwiatowa 5, 00-001 Warszawa\nKRS: 0000123456\n"
+                        "Zamawiający:\nGmina Przykładowo\nul. Rynek 1, 00-002 Przykładowo\n")
+        self.assertEqual(w["Odwolujacy"][0]["nazwa"], "Alfa Beta sp. z o.o.")
+        self.assertEqual(w["Zamawiajacy"][0]["nazwa"], "Gmina Przykładowo")
+
+    def test_nazwa_i_adres_w_jednej_linii_oraz_adres_bez_ul(self):
+        w = self._wynik("Odwołujący: Alfa Beta sp. z o.o., ul. Kwiatowa 5, 00-001 Warszawa, KRS: 0000123456\n"
+                        "Zamawiający:\nGmina Przykładowo\nRynek 1\n00-002 Przykładowo\nNIP: 9876543210\n")
+        self.assertEqual((w["Odwolujacy"][0]["nazwa"], w["Odwolujacy"][0]["krs"]), ("Alfa Beta sp. z o.o.", "0000123456"))
+        self.assertEqual((w["Zamawiajacy"][0]["nazwa"], w["Zamawiajacy"][0]["nip"]), ("Gmina Przykładowo", "9876543210"))
+
+
 class TestLLM(unittest.TestCase):
     """Warstwa LLM z atrapą modelu (bez sieci): co przyjmujemy, a co odrzucamy."""
 
@@ -468,6 +513,14 @@ class TestPrzykladyOrganizatora(unittest.TestCase):
         self.assertEqual(w["OdwolanieKIO"]["miejscowosc"], "Warszawa")
         self.assertEqual(w["ZamowieniePubliczne"]["numer_bzp"], "2025/BZP00270698")
         self.assertEqual(w["ZamowieniePubliczne"]["numer_postepowania"], "RZP.27.29.2025.KD")
+        # układ "etykieta pod blokiem" + nazwa odwołującego z treści (w nagłówku jest zaczerniona)
+        self.assertEqual(w["Odwolujacy"][0]["nazwa"], "BIOARCUS Spółka z ograniczoną odpowiedzialnością")
+        self.assertEqual(w["Odwolujacy"][0]["przez-pelnomocnika"], 1)
+        self.assertIsNone(w["Odwolujacy"][0]["pelnomocnik"]["imie_nazwisko"])   # zaczernione - bez śmieci OCR
+        self.assertEqual(w["Zamawiajacy"][0]["nazwa"], "Miejskie Przedsiębiorstwo Oczyszczania w m. st. "
+                                                       "Warszawie Spółka z ograniczoną odpowiedzialnością")
+        self.assertEqual(w["OdwolanieKIO"]["czynnosc_powod_id"], 4)
+        self.assertEqual(w["OdwolanieKIO"]["czynnosc_dzien"], "2025-06-10")
 
 
 @unittest.skipUnless(sys.platform == "win32", "run.bat tylko na Windows")

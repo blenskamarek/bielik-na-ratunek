@@ -32,6 +32,34 @@ sekcje:
   zamawiajacy:
     w: naglowek
     regex: '^[^\w\n]{0,3}Zamawiający\b(?![ \t]+w dniu)[ \t]*:?[ \t]*([\s\S]*?)(?=^[^\w\n]{0,3}(?:\d+\)[ \t]*)?(?:Odwołujący|Wykonawca|Uczestnik|Przystępując)|^[^\w\n]{0,3}(?:Prezes\w*\s+Krajowej|Krajowa\s+Izba|(?-i:O ?D ?W ?O ?Ł ?A ?N ?I ?E)\s*$)|\Z)'
+
+  # Układ "etykieta POD blokiem" (prawdziwe odwołania pisane w dwóch kolumnach: OCR czyta najpierw dane
+  # strony, potem etykietę). Rozpoznanie: po ostatniej samotnej linii etykiety ("Zamawiający:") nagłówek
+  # ma już tylko tytuł ODWOŁANIE i/lub adresata (Prezes KIO, ul. Postępu, 02-676 Warszawa), a potem
+  # "Dotyczy:". Te sekcje istnieją tylko w tym układzie, więc nie ruszają zwykłego układu (etykieta nad blokiem).
+  naglowek_po:
+    w: naglowek
+    regex: '\A([\s\S]*^[^\w\n]{0,3}(?:Odwołujący|Zamawiający)[ \t]*:[ \t]*$)(?:\s*^[^\n]*(?:(?-i:O ?D ?W ?O ?Ł ?A ?N ?I ?E)|Prezes|Krajow\w*\s+Izb|Izby\s+Odwoławczej|\bPostępu\b|\b02-676\b|,[ \t]*(?:dnia[ \t]+)?{DATA})[^\n]*$)*\s*\Z'
+  # blok strony = linie tuż nad samotną etykietą, po ostatniej linii "granicznej"
+  # (adresat: Prezes KIO / ul. Postępu / 02-676, linia z datą pisma, inna samotna etykieta)
+  odwolujacy_po:
+    w: naglowek_po
+    regex: '^((?:(?![^\n]*(?:Izby\s+Odwoławczej|Krajowa\s+Izba|\bPostępu\b|\b02-676\b)|[^\n]*,[ \t]*(?:dnia[ \t]+)?{DATA}|[^\w\n]{0,3}(?:Odwołujący|Zamawiający|Wykonawca|Uczestnik|Przystępujący)\w*[ \t]*:?[ \t]*$)[^\n]*\n)+?)^[^\w\n]{0,3}Odwołujący[ \t]*:[ \t]*$'
+  zamawiajacy_po:
+    w: naglowek_po
+    regex: '^((?:(?![^\n]*(?:Izby\s+Odwoławczej|Krajowa\s+Izba|\bPostępu\b|\b02-676\b)|[^\n]*,[ \t]*(?:dnia[ \t]+)?{DATA}|[^\w\n]{0,3}(?:Odwołujący|Zamawiający|Wykonawca|Uczestnik|Przystępujący)\w*[ \t]*:?[ \t]*$)[^\n]*\n)+?)^[^\w\n]{0,3}Zamawiający[ \t]*:[ \t]*$'
+  # cały dokument, ale tylko w układzie "etykieta pod blokiem" (jak naglowek_po: samotna etykieta,
+  # najwyżej tytuł/adresat, potem "Dotyczy")
+  uklad_po:
+    regex: '\A(?=[\s\S]*?^[^\w\n]{0,3}(?:Odwołujący|Zamawiający)[ \t]*:[ \t]*\n(?:\s*^[^\n]*(?:(?-i:O ?D ?W ?O ?Ł ?A ?N ?I ?E)|Prezes|Krajow\w*\s+Izb|Izby\s+Odwoławczej|\bPostępu\b|\b02-676\b|,[ \t]*(?:dnia[ \t]+)?{DATA})[^\n]*\n)*\s*^[^\w\n]{0,3}dotyczy\b)(?P<tresc>[\s\S]*)'
+    grupa: tresc                # nazwana grupa: makro {DATA} w warunku ma własne grupy
+  # nazwa odwołującego ze zdania "w imieniu [wykonawcy] X, wnoszę odwołanie": w prawdziwych odwołaniach
+  # nazwa w nagłówku bywa zaczerniona, a w treści nie. Tylko układ "pod blokiem" i nie dla konsorcjum
+  # (w syntetyce przy konsorcjum zdanie wymienia wszystkich członków, a wzorzec - lidera).
+  w_imieniu_po:
+    w: uklad_po
+    szukaj_w: plaski
+    regex: 'w imieniu(?: i na rzecz)?\s+(?:wykonawcy\s+|Odwołującego\s*[—–-]?\s*)?(?!Odwołując|Zamawiając|własn|wykonawc|Konsorcj)((?-i:[„"A-ZĄĆĘŁŃÓŚŹŻ])[^,;()]{2,150}?)(?=\s*\((?:dalej|zwan)|\s+z\s+siedzibą|\s*,\s*(?:wnosz|w oparciu|na podstawie|zgodnie|reprezentowan|ul\.|al\.|KRS|NIP)|\s+wnosz)'
   # "dotyczy: ... pn. „tytuł” nr referencyjny ..., BZP ..., TED ..." aż do treści odwołania
   dotyczy:
     szukaj_w: plaski
@@ -43,10 +71,18 @@ sekcje:
       - '(?-i:polegających na:)\s*(?:Strona \d+ z \d+\s*)?1\)\s*(.*?)(?=;|\s2\)\s)'
       # "wnoszę odwołanie wobec: 1. ..." (w skanie przed "1." bywa wtrącona stopka strony, "1" bywa "|")
       - 'wnoszę odwołanie\s+(?:wobec|od)\b[^:]{0,60}:\s*(?:.{0,300}?\s)??(?-i:1|\||l|I)[.)]\s*(?!\d)(.*?)(?=;|\s2[.,)]\s)'
-  # ... albo zdanie "Zamawiający w dniu <data> ..."
+      # bez numerowanej listy (prawdziwe odwołania): "wnoszę odwołanie na czynności Zamawiającego ...,
+      # tj.: wobec treści dokumentów zamówienia - SWZ." / "... polegającą na odrzuceniu oferty ..."
+      - 'wnoszę odwołanie.{0,700}?(?:\btj\.:?|\bto jest:?|polegając\w*\s+na:?)\s*(.{10,400}?)(?=\.\s+(?-i:[A-ZĄĆĘŁŃÓŚŹŻ])|;|$)'
+      - 'wnoszę odwołanie\s+(?:wobec|od|na)\s+(.{10,300}?)(?=\.\s+(?-i:[A-ZĄĆĘŁŃÓŚŹŻ])|;|$)'
+  # ... albo zdanie "Zamawiający w dniu <data> ..." (w prawdziwych odwołaniach także
+  # "Zamawiający zamieścił ogłoszenie ... w dniu <data>" i "W dniu <data> Zamawiający poinformował ...")
   zdanie_czynnosc:
     szukaj_w: plaski
-    regex: '((?-i:Zamawiający) w dniu [^.]*?\.)(?= (?-i:[A-ZŁ]))'
+    regex:
+      - '((?-i:Zamawiający) w dniu [^.]*?\.)(?= (?-i:[A-ZŁ]))'
+      - '((?-i:Zamawiający)\s+(?:poinformował|zawiadomił|przekazał|opublikował|zamieścił|udostępnił|udzielił|zmodyfikował|zmienił|dokonał|unieważnił|odrzucił|wykluczył|wybrał)\w*\s+(?:[^\s.]+\s+){0,8}?w dniu\s+{DATA}(?:\s*r(?:\.|oku))?[^.]*?\.)'
+      - '((?-i:W) dniu\s+{DATA}(?:\s*r(?:\.|oku))?,?\s+(?-i:Zamawiający)\s+(?:poinformował|zawiadomił|przekazał|opublikował|zamieścił|udostępnił|udzielił|zmodyfikował|zmienił|dokonał|unieważnił|odrzucił|wykluczył|wybrał)[^.]*\.)'
 
 pola:
   # nagłówek pisma: linia "Miejscowość, dnia <data> r."
@@ -76,7 +112,7 @@ pola:
       - [5, 'zmodyfikow|modyfikacj']
       - [6, 'odpowiedzi|wyjaśnieni']
       - [11, 'opis\w* przedmiotu zamówienia|\bopz\b']
-      - [4, 'specyfikacj|\bswz\b|opublikow|publikacj']
+      - [4, 'specyfikacj|\bswz\b|opublikow|publikacj|zamieści\w*\s+ogłoszeni']
   # słownik organizatora: oczekiwane-json/czynnosc_powod_id_dict.md (opisy 1:1, także "/" w id 6)
   OdwolanieKIO.czynnosc_opis:
     z_pola: OdwolanieKIO.czynnosc_powod_id
@@ -121,34 +157,52 @@ listy:
   # blok strony: [etykieta:] nazwa (1-3 linie, może być w linii etykiety) / adres: ulica (+ linia z kodem)
   # / 0..n linii z KRS-NIP-REGON / [e-mail] / [dopisek o prowadzącym postępowanie]
   Odwolujacy:
-    w: odwolujacy
     max: 1                      # przy konsorcjum tylko pierwszy blok = lider
-    regex: &blok_strony '(?:^[^\w\n]{0,3}(?P<etykieta>[^\n]*:)[ \t]*\n)?^[^\w\n]{0,4}(?:\d\)[ \t]*)?(?P<nazwa>(?![^\w\n]{0,4}(?:ul|al|pl|os)\.\s)(?![^\w\n]{0,4}(?:Zamawiając|Odwołując|Wykonawc|Konsorcjum|Lider|Partner|reprezentowan|adres do|tel\.|e-?mail))(?![^\n]*:[ \t]*$)(?![^\n]*(?:\b(?:KRS|NIP|REGON)\b|@|Izby\s+Odwo))[^\n]*\w[^\n]*(?:\n(?![^\w\n]{0,4}(?:ul|al|pl|os)\.\s)(?![^\n]*(?:\b(?:KRS|NIP|REGON)\b|e-?mail|\btel\.|\b\d{2}-\d{3}\b|:[ \t]*$))[^\n]*\w[^\n]*){0,2})[ \t]*\n^[^\w\n]{0,4}(?:ul|al|pl|os)\.\s[^\n]*(?:\n|\Z)(?:^(?![^\n]*\b(?:KRS|NIP|REGON)\b)[^\n]*\b\d{2}-\d{3}\b[^\n]*(?:\n|\Z))?(?P<ids>(?:^[^\n]*\b(?:KRS|NIP|REGON)\b[^\n]*(?:\n|\Z))*)(?:^[^\n]*e-?mail[^\n]*(?:\n|\Z))?(?P<dopisek>^[^\w\n]{0,4}Zamawiający\s+prowadząc[^\n]*)?'
+    regex:
+      # 1) układ "etykieta pod blokiem" (sekcja istnieje tylko w tym układzie)
+      # blok luźny: nazwa = pierwsza linia + linie kontynuacji (zaczynające się małą literą albo formą
+      # prawną: "odpowiedzialnością", "Sp. z o.o."); nazwa kończy się też na ", ul." / ", 00-000" /
+      # "z siedzibą" / "KRS|NIP|REGON", gdy nazwa i adres są w jednej linii. Bez wymogu linii "ul.".
+      - w: odwolujacy_po
+        regex: &blok_luzny '\A\s*(?:(?:\d\)[ \t]*)?(?:Konsorcj|Wykonawc|Zamawiając|Odwołując|Lider|Partner)[\s\S]*?:[ \t]*\n\s*|[^\n]*:[ \t]*\n\s*)*[^\w\n]{0,4}(?:\d\)[ \t]*)?(?P<nazwa>(?:[^\n]|\n(?=[^\w\n]{0,2}(?-i:[a-ząćęłńóśźż]|Sp(?:ółk|\.|\s)|S\.\s?A\b))(?![^\w\n]{0,2}(?:(?:ul|al|pl|os|tel|lok)\.|e-?mail|kontakt|reprezentowan|adres|tel\b))(?![^\n]*(?:@|\b\d{2}-\d{3}\b|\b(?:KRS|NIP|REGON)\b)))+?)(?=[ \t]*,[ \t]*(?:ul|al|pl|os)\.\s|,?[ \t]+z[ \t]+siedzib|[ \t]*,[ \t]*\d{2}-\d{3}\b|[ \t]*[,;(][ \t]*(?:KRS|NIP|REGON)\b|[ \t]*\n(?!(?=[^\w\n]{0,2}(?-i:[a-ząćęłńóśźż]|Sp(?:ółk|\.|\s)|S\.\s?A\b))(?![^\w\n]{0,2}(?:(?:ul|al|pl|os|tel|lok)\.|e-?mail|kontakt|reprezentowan|adres|tel\b))(?![^\n]*(?:@|\b\d{2}-\d{3}\b|\b(?:KRS|NIP|REGON)\b)))|[ \t]*\Z)(?P<ids>[\s\S]*)'
+      # 2) zwykły układ: etykieta nad blokiem, adres w osobnej linii "ul./al./pl./os."
+      - w: odwolujacy
+        regex: &blok_strony '(?:^[^\w\n]{0,3}(?P<etykieta>[^\n]*:)[ \t]*\n)?^[^\w\n]{0,4}(?:\d\)[ \t]*)?(?P<nazwa>(?![^\w\n]{0,4}(?:ul|al|pl|os)\.\s)(?![^\w\n]{0,4}(?:Zamawiając|Odwołując|Wykonawc|Konsorcjum|Lider|Partner|reprezentowan|adres do|tel\.|e-?mail))(?![^\n]*:[ \t]*$)(?![^\n]*(?:\b(?:KRS|NIP|REGON)\b|@|Izby\s+Odwo))[^\n]*\w[^\n]*(?:\n(?![^\w\n]{0,4}(?:ul|al|pl|os)\.\s)(?![^\n]*(?:\b(?:KRS|NIP|REGON)\b|e-?mail|\btel\.|\b\d{2}-\d{3}\b|:[ \t]*$))[^\n]*\w[^\n]*){0,2})[ \t]*\n^[^\w\n]{0,4}(?:ul|al|pl|os)\.\s[^\n]*(?:\n|\Z)(?:^(?![^\n]*\b(?:KRS|NIP|REGON)\b)[^\n]*\b\d{2}-\d{3}\b[^\n]*(?:\n|\Z))?(?P<ids>(?:^[^\n]*\b(?:KRS|NIP|REGON)\b[^\n]*(?:\n|\Z))*)(?:^[^\n]*e-?mail[^\n]*(?:\n|\Z))?(?P<dopisek>^[^\w\n]{0,4}Zamawiający\s+prowadząc[^\n]*)?'
+      # 3) etykieta nad blokiem, ale adres bez "ul." albo nazwa i adres w jednej linii
+      - w: odwolujacy
+        regex: *blok_luzny
     pola:
       krs: {w: ids, regex: 'KRS[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
+      # w układzie "pod blokiem" najpierw nazwa ze zdania "w imieniu ..." (sekcja w_imieniu_po),
+      # potem z bloku nagłówka
       nazwa:
-        z_grupy: nazwa
-        zamien: [['\s*\((?:lider|partner)[^)]*\)', ''], ['(?:\s+[^\w\s]+)+$', '']]   # dopisek o roli w konsorcjum, śmieci OCR
+        w: [w_imieniu_po, nazwa]
+        regex: '\A\s*([\s\S]+?)\s*\Z'
+        # dopisek o roli w konsorcjum, cudzysłowy wokół nazwy, śmieci OCR na końcu
+        zamien: [['\s*\((?:lider|partner)[^)]*\)', ''], ['[„”“"]', ''], ['(?:\s+[^\w\s]+)+$', '']]
       nip: {w: ids, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
       regon: {w: ids, regex: 'REGON[:\s]*((?:\d[ -]?){8}\d(?:(?:[ -]?\d){5})?)', typ: cyfry}
       przez-pelnomocnika: {w: naglowek, mapa: [[1, 'reprezentowan\w*']], domyslnie: 0}
+      # imię i nazwisko z wielkiej litery (zaczerniony tekst w skanie daje np. "ij KA")
       pelnomocnik.imie_nazwisko:
         w: naglowek
         szukaj_w: plaski
-        regex: 'reprezentowan\w*\b(?:(?!adres do korespondencji|tel\.).){0,80}?(?:\badw\.|\badwokat\w*|\br\.\s?pr\.|\bradc\w*\s+prawn\w*|\bmec\.)\s+([^\W\d_]+(?:-[^\W\d_]+)* [^\W\d_]+(?:-[^\W\d_]+)*)'
+        regex: 'reprezentowan\w*\b(?:(?!adres do (?:korespondencji|doręczeń)|tel\.).){0,80}?(?:\badw\.|\badwokat\w*|\br\.\s?pr\.|\bradc\w*\s+prawn\w*|\bmec\.)\s+((?-i:[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:-[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)* [A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:-[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)*))'
       pelnomocnik.nazwa:
         w: naglowek
         szukaj_w: plaski
-        regex: 'adres do korespondencji:?\s*(.+?),?\s+(?:ul|al|pl|os)\.\s'
+        regex: 'adres do (?:korespondencji|doręczeń):?\s*(.+?),?\s+(?:ul|al|pl|os)\.\s'
         zamien: [['^[^\w]+', ''], ['(?:\s+[^\w\s]+)+$', '']]   # śmieci OCR na początku i końcu
       pelnomocnik.mail:
         w: naglowek
         szukaj_w: plaski
-        regex: 'adres do korespondencji.*?([\w.+-]+@[\w-]+(?:\.[\w-]+)+)'
+        regex: 'adres do (?:korespondencji|doręczeń).*?([\w.+-]+@[\w-]+(?:\.[\w-]+)+)'
 
   Zamawiajacy:
-    w: zamawiajacy
-    regex: *blok_strony
+    regex:
+      - {w: zamawiajacy_po, regex: *blok_luzny}   # układ "etykieta pod blokiem"
+      - {w: zamawiajacy, regex: *blok_strony}     # zwykły układ
+      - {w: zamawiajacy, regex: *blok_luzny}      # adres bez "ul." / wszystko w jednej linii
     pola:
       krs: {w: ids, regex: 'KRS[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
       nazwa:

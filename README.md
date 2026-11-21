@@ -63,7 +63,7 @@ PDF ─▶ tekst (pypdf) ─▶ OCR stron bez tekstu (Tesseract, pol)
 | Uruchomienie | Ollama na komputerze z GPU (RTX 5060 8 GB), kontekst 6144 tokenów |
 | Dostęp dla programu | HTTPS przez kolejkę na serwerze w Polsce (hosting cal.pl): program wrzuca zadanie, komputer z modelem sam je pobiera (tylko połączenia wychodzące) i odsyła wynik |
 | Ustawienia | temperatura 0, stałe ziarno, odpowiedzi w pamięci podręcznej (powtórny przebieg nie zużywa tokenów) |
-| Rola | uzupełnienie pól pustych po regułach (np. strony i czynność w realnych skanach), z weryfikacją w tekście |
+| Rola | uzupełnienie pól pustych po regułach (np. strony i czynność w układzie, którego reguły nie znają), z weryfikacją w tekście |
 | Odporność | pracownik nieaktywny → wykrycie w ≤ 20 s i dalej same reguły; zły klucz → natychmiast same reguły |
 
 Pomiar (model wypełnia **wszystkie** pola odwołania sam, zestawy 51–60, `narzedzia/porownaj_llm.py`):
@@ -86,6 +86,8 @@ wypełniają większość pól bez modelu. Szczegóły i konfiguracja: [docs/ZDA
 | F1 na danych treningowych UZP z warstwą tekstową (60 spraw, 180 dokumentów) | **1,000** |
 | F1 na skanach UZP (30 dokumentów, OCR), same reguły – wszystkie / odłożone 0008–0010 | **0,917** / **0,808** |
 | F1 na skanach odłożonych z modelem Bielik 11B | 0,810 |
+| Realne odwołanie UZP (skan z zaczernieniami, `szablon-aplikacja`; wzorcowy JSON pusty – sprawdzone ręcznie), same reguły | 11 z 12 widocznych pól (wcześniej 5) |
+| Warianty układu nagłówka (etykieta pod danymi / adres bez „ul.” / nazwa i adres w jednej linii; z 60 dokumentów tekstowych) | 1,000 / 0,996 / 1,000 (wcześniej 0,61 / 0,59 / 0,63) |
 | Dokumenty negatywne UZP (16) | 16/16 pusty plik |
 | Klasyfikacja (180 tekstowych + 30 skanów + realny skan UZP; 16 negatywów) | 211/211, 16/16 |
 | Czas: 196 PDF-ów tekstowych, same reguły | ~9 s |
@@ -94,6 +96,13 @@ Skany: reguły rozwijane na zestawach 0001–0007 każdego typu, 0008–0010 od�
 (przed rozwinięciem reguł pod skany F1 na wszystkich 30 skanach wynosiło 0,385). Typowe błędy OCR
 („Sp. z 0.0.”, `@` odczytane jako `Q`, puste linie) są poprawiane przed regułami; błędnie odczytanych cyfr
 i liter nie da się odtworzyć.
+
+Realne odwołania (zbiór testowy konkursu to „realne sprawy odwoławcze”) mają inny układ niż dane syntetyczne.
+W jedynym realnym przykładzie UZP etykieta „Odwołujący:” stoi **pod** danymi strony (dwie kolumny), a nazwa
+w nagłówku jest zaczerniona. Reguły rozpoznają ten układ, biorą wtedy nazwę odwołującego ze zdania
+„w imieniu wykonawcy …, wnoszę odwołanie”, a czynność z „wnoszę odwołanie …, tj.: …” i „Zamawiający zamieścił …
+w dniu …”. Warianty układu są **wygenerowane przez nas** z dokumentów syntetycznych (te same wartości, inny
+układ), a realny dokument jest jeden. To sprawdzian odporności, nie pomiar na realnych danych.
 
 ## Nowy typ dokumentu – bez zmian w kodzie
 
