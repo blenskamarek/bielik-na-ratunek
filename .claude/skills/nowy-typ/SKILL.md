@@ -27,6 +27,8 @@ zmiany w `silnik/`, `run.py` ani w istniejących typach. Pełna składnia: `docs
 5. Dla pól o stałej etykiecie dopisz reguły w `pola:` (regex w pojedynczych cudzysłowach; `{DATA}`,
    `{KWOTA}`; `flagi: [dotall]` dla wartości wielowierszowych). Iteruj z
    `sprawdz typy\<nazwa> --bez-llm`, aż pola z reguł mają F1 = 1 na wszystkich przykładach.
+   Numerom, datom i kodom dopisz `walidacja` (`dlugosc`, `wzorzec`, `wartosci`, `zakres`). `suma_kontrolna`
+   (nip/regon/pesel/rachunek) tylko, gdy numery w przykładach ją przechodzą – `sprawdz` pokaże odrzucenia.
 6. Regresja: `sprawdz typy\<nazwa> --bez-llm --dane <katalog z PDF-ami innych typów>` → **0 zmian**.
    Jeśli są zmiany: zaostrz `wymagane_na_poczatku` / słowa kluczowe, nie ruszaj innych typów.
 7. `py -m unittest discover -s tests` – wszystko musi przejść.

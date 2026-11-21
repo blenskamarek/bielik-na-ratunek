@@ -17,6 +17,8 @@ Plik typy/<nazwa>/typ.yaml (pełny opis z przykładami: docs/NOWY_TYP.md):
         wszystkie: true                   # lista wszystkich trafień
         mapa: [[wartość, 'regex'], ...]   # wartość wg pierwszej pasującej reguły
         z_pola: a.id + slownik: {1: opis} # wartość wyliczona z innego pola
+        walidacja: {dlugosc: 10, wzorzec: '..', wartosci: [..], zakres: [od, do], suma_kontrolna: nip}
+                                          # wartość niespełniająca warunków jest pomijana (szukanie trwa dalej)
         domyslnie: null
     listy:                           # listy obiektów
       strony:
@@ -38,7 +40,7 @@ import re
 from functools import lru_cache
 from typing import Any
 
-from silnik.narzedzia import WZ_DATA, data_iso, kwota, tylko_cyfry_rachunku
+from silnik.narzedzia import SUMY_KONTROLNE, WZ_DATA, data_iso, kwota, tylko_cyfry_rachunku
 
 MAKRA = {
     "DATA": WZ_DATA.pattern,
@@ -99,6 +101,70 @@ def normalizuj(wartosc: str | None, typ: str | None) -> Any:
     if typ == "bool":
         return w.casefold() in {"tak", "1", "true"}
     raise BladKonfiguracji(f"nieznany typ wartości: {typ}")
+
+
+# ----------------------------------------------------------------------------- walidacja
+KLUCZE_WALIDACJI = {"dlugosc", "wzorzec", "wartosci", "zakres", "suma_kontrolna"}
+
+
+def _nie_wieksze(a, b) -> bool:
+    """a <= b: liczbowo, a gdy się nie da - jako tekst (daty ISO porównują się poprawnie)."""
+    try:
+        return float(a) <= float(b)
+    except (TypeError, ValueError):
+        return str(a) <= str(b)
+
+
+def waliduj(wartosc: Any, warunki: dict | None) -> str | None:
+    """Powód odrzucenia wartości wg klucza `walidacja` (None = wartość poprawna albo brak warunków).
+
+    dlugosc: 10 | [9, 14]   długość napisu wartości (po normalizacji, np. same cyfry)
+    wzorzec: 'regex'        cała wartość musi pasować (makra {DATA}, {KWOTA} działają)
+    wartosci: [..]          dozwolone wartości (bez rozróżniania wielkości liter)
+    zakres: [od, do]        liczby albo daty ISO; null = bez ograniczenia z tej strony
+    suma_kontrolna: nip | regon | pesel | rachunek   (rachunek: IBAN / NRB, mod 97)
+    """
+    if not warunki or wartosc is None:
+        return None
+    s = str(wartosc)
+    if warunki.get("dlugosc") is not None:
+        dozwolone = warunki["dlugosc"] if isinstance(warunki["dlugosc"], list) else [warunki["dlugosc"]]
+        if len(s) not in dozwolone:
+            return f"zła długość {len(s)} (oczekiwano {'/'.join(map(str, dozwolone))})"
+    if warunki.get("wzorzec") and not _kompiluj(warunki["wzorzec"], None).fullmatch(s):
+        return f"nie pasuje do wzorca {warunki['wzorzec']}"
+    if warunki.get("wartosci") is not None and s.casefold() not in {str(x).casefold() for x in warunki["wartosci"]}:
+        return "spoza dozwolonych wartości"
+    if warunki.get("zakres") is not None:
+        od, do = warunki["zakres"]
+        if not ((od is None or _nie_wieksze(od, wartosc)) and (do is None or _nie_wieksze(wartosc, do))):
+            return f"poza zakresem [{od}, {do}]"
+    suma = warunki.get("suma_kontrolna")
+    if suma and not SUMY_KONTROLNE[suma](wartosc):
+        return f"błędna suma kontrolna ({suma})"
+    return None
+
+
+def sprawdz_walidacje(warunki: Any, miejsce: str) -> None:
+    """Błąd w kluczu `walidacja` zgłaszany przy wczytaniu typu, z nazwą pola i problemu."""
+    m = f"{miejsce}.walidacja"
+    if not isinstance(warunki, dict) or not warunki:
+        raise BladKonfiguracji(f"{m}: oczekiwano słownika warunków ({', '.join(sorted(KLUCZE_WALIDACJI))})")
+    nieznane = set(warunki) - KLUCZE_WALIDACJI
+    if nieznane:
+        raise BladKonfiguracji(f"{m}: nieznany warunek {', '.join(sorted(nieznane))} "
+                               f"(dozwolone: {', '.join(sorted(KLUCZE_WALIDACJI))})")
+    dl = warunki.get("dlugosc")
+    if dl is not None and not (isinstance(dl, int) or (isinstance(dl, list) and dl and all(isinstance(x, int) for x in dl))):
+        raise BladKonfiguracji(f"{m}.dlugosc: liczba albo lista liczb, np. 10 lub [9, 14]")
+    if warunki.get("wzorzec") is not None:
+        _kompiluj(str(warunki["wzorzec"]), None)
+    if warunki.get("wartosci") is not None and not isinstance(warunki["wartosci"], list):
+        raise BladKonfiguracji(f"{m}.wartosci: lista dozwolonych wartości, np. [1, 2, 3]")
+    if warunki.get("zakres") is not None and not (isinstance(warunki["zakres"], list) and len(warunki["zakres"]) == 2):
+        raise BladKonfiguracji(f"{m}.zakres: dwie granice [od, do], np. [1, 12] albo ['2020-01-01', null]")
+    if warunki.get("suma_kontrolna") is not None and warunki["suma_kontrolna"] not in SUMY_KONTROLNE:
+        raise BladKonfiguracji(f"{m}.suma_kontrolna: jedna z {', '.join(sorted(SUMY_KONTROLNE))}")
 
 
 def _ustaw(wynik: dict, sciezka: str, wartosc: Any) -> None:
@@ -162,6 +228,14 @@ class Kontekst:
     def __init__(self, tekst: str):
         self.sekcje: dict[str, str | None] = {"dokument": tekst}
         self.wynik: dict = {}
+        self.odrzucone: list[dict] = []           # wartości odrzucone przez `walidacja` (do raportu)
+
+    def poprawna(self, wartosc: Any, regula: dict, pole: str) -> bool:
+        """Czy wartość spełnia `walidacja` reguły; odrzuconą zapisuje z powodem."""
+        powod = waliduj(wartosc, regula.get("walidacja"))
+        if powod:
+            self.odrzucone.append({"pole": pole, "wartosc": wartosc, "powod_odrzucenia": powod})
+        return powod is None
 
     def zrodla(self, w, dodatkowe: dict | None = None) -> list[str | None]:
         nazwy = _lista_wzorcow(w) or ["dokument"]
@@ -169,19 +243,21 @@ class Kontekst:
         return [dostepne.get(n) for n in nazwy]
 
 
-def _wartosc(ctx: Kontekst, regula: dict, dodatkowe: dict | None = None) -> Any:
-    """Wartość pola wg reguły (regex / mapa / z_pola) w kolejnych źródłach."""
+def _wartosc(ctx: Kontekst, regula: dict, dodatkowe: dict | None = None, pole: str = "") -> Any:
+    """Wartość pola wg reguły (regex / mapa / z_pola) w kolejnych źródłach.
+    Z `walidacja` wygrywa pierwsza POPRAWNA wartość (także kolejne trafienia tego samego regexu)."""
     if "z_pola" in regula:
         v = _pobierz(ctx.wynik, regula["z_pola"])
         slownik = regula.get("slownik") or {}
-        return slownik.get(v, slownik.get(str(v), regula.get("domyslnie")))
+        v = slownik.get(v, slownik.get(str(v), regula.get("domyslnie")))
+        return v if v is None or ctx.poprawna(v, regula, pole) else None
     zrodla = [_przygotuj(z, regula) for z in ctx.zrodla(regula.get("w"), dodatkowe)]
     if "mapa" in regula:
         for zrodlo in zrodla:
             if zrodlo is None:
                 continue
             for wartosc, wz in regula["mapa"]:
-                if _kompiluj(wz, regula.get("flagi")).search(zrodlo):
+                if _kompiluj(wz, regula.get("flagi")).search(zrodlo) and ctx.poprawna(wartosc, regula, pole):
                     return wartosc
         return regula.get("domyslnie")
     typ = regula.get("typ")
@@ -194,15 +270,16 @@ def _wartosc(ctx: Kontekst, regula: dict, dodatkowe: dict | None = None) -> Any:
                 wyniki = []
                 for m in rx.finditer(zrodlo):
                     v = normalizuj(_surowa_wartosc(m, regula), typ)
-                    if v is not None and v not in wyniki:
+                    if v is not None and v not in wyniki and ctx.poprawna(v, regula, pole):
                         wyniki.append(v)
                 if wyniki:
                     return wyniki
             else:
-                m = rx.search(zrodlo)
-                if m:
+                # bez walidacji tylko pierwsze trafienie (jak dotąd); z walidacją - pierwsze poprawne
+                trafienia = rx.finditer(zrodlo) if regula.get("walidacja") else filter(None, [rx.search(zrodlo)])
+                for m in trafienia:
                     v = normalizuj(_surowa_wartosc(m, regula), typ)
-                    if v is not None:
+                    if v is not None and ctx.poprawna(v, regula, pole):
                         return v
     return regula.get("domyslnie")
 
@@ -253,7 +330,8 @@ def _alternatywy(regula: dict) -> list[dict]:
     return wynik
 
 
-def _lista(ctx: Kontekst, regula: dict, dodatkowe: dict | None = None, wartosci_nadrz: dict | None = None) -> list[dict]:
+def _lista(ctx: Kontekst, regula: dict, dodatkowe: dict | None = None, wartosci_nadrz: dict | None = None,
+           sciezka: str = "") -> list[dict]:
     typy = regula.get("typy") or {}
     # warianty po kolei (pierwszy, który coś znalazł, wygrywa); w każdym wariancie źródła po kolei
     for alt in _alternatywy(regula):
@@ -274,19 +352,22 @@ def _lista(ctx: Kontekst, regula: dict, dodatkowe: dict | None = None, wartosci_
                 obiekt: dict = {}
                 plaskie: dict = {}                    # wartości do wzorców {pole} w listach zagnieżdżonych
                 for pole, spec in regula["pola"].items():
+                    sciezka_pola = f"{sciezka}[{i}].{pole}"
                     if isinstance(spec, str):          # nazwa grupy
                         v = normalizuj(m.groupdict().get(spec), typy.get(pole))
                     elif "lista" in spec:
-                        v = _lista(ctx, spec["lista"], lokalne, plaskie)
+                        v = _lista(ctx, spec["lista"], lokalne, plaskie, sciezka_pola)
                     elif "z_grupy" in spec:
                         tekst_grupy = m.groupdict().get(spec["z_grupy"])
                         if "mapa" in spec:
-                            v = _wartosc(ctx, {**spec, "w": "_grupa"}, {"_grupa": tekst_grupy}) \
+                            v = _wartosc(ctx, {**spec, "w": "_grupa"}, {"_grupa": tekst_grupy}, sciezka_pola) \
                                 if tekst_grupy is not None else spec.get("domyslnie")
                         else:
                             v = normalizuj(_zamien(tekst_grupy, spec), spec.get("typ") or typy.get(pole))
+                            if v is not None and not ctx.poprawna(v, spec, sciezka_pola):
+                                v = spec.get("domyslnie")
                     else:
-                        v = _wartosc(ctx, {"w": "dopasowanie", **spec}, lokalne)
+                        v = _wartosc(ctx, {"w": "dopasowanie", **spec}, lokalne, sciezka_pola)
                     _ustaw(obiekt, pole, v)
                     plaskie[pole.replace(".", "_")] = v
                     plaskie[pole.split(".")[-1]] = v
@@ -307,15 +388,18 @@ def _lista(ctx: Kontekst, regula: dict, dodatkowe: dict | None = None, wartosci_
 
 
 # ----------------------------------------------------------------------------- całość
-def ekstrahuj(tekst: str, konf: dict) -> dict:
-    """Buduje wynik JSON dla dokumentu wg konfiguracji typu."""
+def ekstrahuj(tekst: str, konf: dict, odrzucone: list | None = None) -> dict:
+    """Buduje wynik JSON dla dokumentu wg konfiguracji typu.
+    `odrzucone` (opcjonalnie): lista, do której trafiają wartości odrzucone przez `walidacja`."""
     ctx = Kontekst(tekst)
     for nazwa, regula in (konf.get("sekcje") or {}).items():
         ctx.sekcje[nazwa] = _sekcja(ctx, regula)
     for sciezka, regula in (konf.get("pola") or {}).items():
-        _ustaw(ctx.wynik, sciezka, _wartosc(ctx, regula))
+        _ustaw(ctx.wynik, sciezka, _wartosc(ctx, regula, pole=sciezka))
     for sciezka, regula in (konf.get("listy") or {}).items():
-        _ustaw(ctx.wynik, sciezka, _lista(ctx, regula))
+        _ustaw(ctx.wynik, sciezka, _lista(ctx, regula, sciezka=sciezka))
+    if odrzucone is not None:
+        odrzucone.extend(ctx.odrzucone)
     return ctx.wynik
 
 
@@ -332,6 +416,8 @@ def _sprawdz_regule(regula: dict, miejsce: str, sekcje: set[str], zrodla_extra: 
     for w, _ in regula.get("zamien") or []:
         _kompiluj(w, regula.get("flagi"))
     normalizuj("1", regula.get("typ"))
+    if "walidacja" in regula:
+        sprawdz_walidacje(regula["walidacja"], miejsce)
     if not ({"regex", "mapa", "z_pola", "z_grupy", "lista"} & set(regula)):
         raise BladKonfiguracji(f"{miejsce}: reguła wymaga 'regex', 'mapa', 'z_pola' lub 'z_grupy'")
 

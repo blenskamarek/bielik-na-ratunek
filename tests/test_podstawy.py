@@ -139,6 +139,76 @@ class TestKonfiguracjaBezKodu(unittest.TestCase):
         self.assertEqual(set(typy), {"odwolanie", "pelnomocnictwo", "przelew"})
 
 
+class TestWalidacja(unittest.TestCase):
+    """Klucz `walidacja` w konfiguracji: warunki dla wartości z reguł i od modelu."""
+
+    def test_sumy_kontrolne(self):
+        from silnik.narzedzia import suma_nip, suma_pesel, suma_rachunku, suma_regon
+        self.assertTrue(suma_nip("123-456-32-18"))
+        self.assertFalse(suma_nip("1234563219"))
+        self.assertTrue(suma_regon("123456785"))
+        self.assertFalse(suma_regon("123456786"))
+        self.assertTrue(suma_pesel("44051401359"))
+        self.assertFalse(suma_pesel("44051401358"))
+        self.assertTrue(suma_rachunku("PL61 1090 1014 0000 0712 1981 2874"))
+        self.assertTrue(suma_rachunku("61109010140000071219812874"))          # NRB bez PL
+        self.assertFalse(suma_rachunku("61109010140000071219812875"))
+
+    def test_warunki(self):
+        import datetime
+        from silnik.konfig import waliduj
+        self.assertIsNone(waliduj("123456785", {"dlugosc": [9, 14]}))
+        self.assertIn("długość", waliduj("12345", {"dlugosc": [9, 14]}))
+        self.assertIsNone(waliduj("2025/BZP00270698", {"wzorzec": r"\d{4}/BZP\d{8}"}))
+        self.assertIn("wzorca", waliduj("2025/BZP0027069", {"wzorzec": r"\d{4}/BZP\d{8}"}))
+        self.assertIsNone(waliduj(4, {"wartosci": [1, 2, 3, 4]}))
+        self.assertIsNotNone(waliduj(13, {"wartosci": [1, 2, 3, 4]}))
+        self.assertIsNone(waliduj("2025-06-10", {"zakres": [datetime.date(2021, 1, 1), None]}))  # YAML: data
+        self.assertIn("zakresem", waliduj("2015-06-10", {"zakres": ["2021-01-01", None]}))
+        self.assertIn("zakresem", waliduj(0.0, {"zakres": [0.01, None]}))
+        self.assertIn("suma kontrolna", waliduj("1234563219", {"suma_kontrolna": "nip"}))
+
+    def _typ(self, pola_yaml: str):
+        from silnik.rdzen import Typ
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        k = Path(tmp.name) / "nowy"
+        k.mkdir()
+        (k / "typ.yaml").write_text("klasyfikacja:\n  slowa_kluczowe: [umowa]\n" + pola_yaml, encoding="utf-8")
+        return Typ(k)
+
+    def test_pierwsza_poprawna_wartosc_i_raport_odrzucen(self):
+        t = self._typ("pola:\n  nip:\n    regex: 'NIP:? ([\\d-]{10,13})'\n    typ: cyfry\n"
+                      "    walidacja: {dlugosc: 10, suma_kontrolna: nip}\n"
+                      "listy:\n  osoby:\n    regex: '^(?P<imie>\\w+) PESEL (?P<pesel>\\d{11})$'\n"
+                      "    pola:\n      imie: imie\n"
+                      "      pesel: {z_grupy: pesel, walidacja: {suma_kontrolna: pesel}}\n")
+        os.environ["LLM_WYLACZ"] = "1"
+        try:
+            w, raport = t.wynik_z_raportem("umowa\nNIP 1234563219 (błąd OCR), NIP: 123-456-32-18\n"
+                                           "Jan PESEL 44051401359\nOla PESEL 44051401358\n")
+        finally:
+            del os.environ["LLM_WYLACZ"]
+        self.assertEqual(w["nip"], "1234563218")                    # drugie trafienie, pierwsze złe
+        self.assertEqual(w["osoby"], [{"imie": "Jan", "pesel": "44051401359"}, {"imie": "Ola", "pesel": None}])
+        self.assertEqual({(r["pole"], r["zrodlo"]) for r in raport}, {("nip", "reguly"), ("osoby[1].pesel", "reguly")})
+        self.assertTrue(all("suma kontrolna" in r["powod_odrzucenia"] for r in raport))
+
+    def test_czytelny_blad_walidacji_w_konfiguracji(self):
+        from silnik.konfig import BladKonfiguracji
+        with self.assertRaisesRegex(BladKonfiguracji, r"pola\.nip\.walidacja: nieznany warunek dlugość"):
+            self._typ("pola:\n  nip: {regex: '(\\d+)', walidacja: {dlugość: 10}}\n")
+        with self.assertRaisesRegex(BladKonfiguracji, r"suma_kontrolna: jedna z"):
+            self._typ("pola:\n  nip: {regex: '(\\d+)', walidacja: {suma_kontrolna: nipp}}\n")
+
+    def test_walidacja_wartosci_od_modelu(self):
+        from silnik.llm import Weryfikator
+        w = Weryfikator("PESEL 44051401359, drugi PESEL 44051401358")
+        spec = {"typ": "cyfry", "dlugosc": 11, "walidacja": {"suma_kontrolna": "pesel"}}
+        self.assertEqual(w.sprawdz("44051401359", spec), ("44051401359", None))
+        self.assertEqual(w.sprawdz("44051401358", spec), (None, "błędna suma kontrolna (pesel)"))
+
+
 class TestNowyTyp(unittest.TestCase):
     """Dodawanie typu bez kodu: sam YAML (reguły i/lub opisy pól dla LLM) + narzędzie nowy_typ.py."""
 

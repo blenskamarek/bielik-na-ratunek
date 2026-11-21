@@ -89,12 +89,14 @@ pola:
   OdwolanieKIO.data:
     regex: '^[ \t]*[^\W\d_][\w .\-]*?,[ \t]*(?:dnia[ \t]+)?({DATA})(?:[ \t]+r(?:oku|\.))?[ \t]*$'
     typ: data
+    walidacja: {zakres: ['2021-01-01', null]}    # odwołania wg Pzp z 2019 r. wnosi się od 2021 r.
   OdwolanieKIO.miejscowosc:
     regex: '^[ \t]*([^\W\d_][\w .\-]*?),[ \t]*(?:dnia[ \t]+)?(?:{DATA})(?:[ \t]+r(?:oku|\.))?[ \t]*$'
   OdwolanieKIO.czynnosc_dzien:
     w: [pierwszy_zarzut, zdanie_czynnosc]
     regex: '({DATA})'
     typ: data
+    walidacja: {zakres: ['2020-01-01', null]}    # czynność bywa wcześniejsza niż samo odwołanie
   # rodzaj czynności: pierwsza pasująca reguła (zaniechania przed decyzjami!)
   OdwolanieKIO.czynnosc_powod_id:
     w: [pierwszy_zarzut, zdanie_czynnosc]
@@ -113,6 +115,7 @@ pola:
       - [6, 'odpowiedzi|wyjaśnieni']
       - [11, 'opis\w* przedmiotu zamówienia|\bopz\b']
       - [4, 'specyfikacj|\bswz\b|opublikow|publikacj|zamieści\w*\s+ogłoszeni']
+    walidacja: {wartosci: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}   # słownik organizatora
   # słownik organizatora: oczekiwane-json/czynnosc_powod_id_dict.md (opisy 1:1, także "/" w id 6)
   OdwolanieKIO.czynnosc_opis:
     z_pola: OdwolanieKIO.czynnosc_powod_id
@@ -135,6 +138,7 @@ pola:
     regex: '(\d{4})\s?/\s?BZP\s?((?:\d\s?){7}\d)(\s?/\s?\d{2})?'
     format: '{1}/BZP{2}{3}'
     zamien: [['\s', '']]          # OCR wstawia spacje między cyfry
+    walidacja: {wzorzec: '\d{4}/BZP\d{8}(?:/\d{2})?'}
   ZamowieniePubliczne.numer_postepowania:
     w: dotyczy
     regex:   # wartość musi zawierać cyfrę; kropka na końcu nie należy do numeru; OCR: "nt" zamiast "nr"
@@ -172,7 +176,9 @@ listy:
       - w: odwolujacy
         regex: *blok_luzny
     pola:
-      krs: {w: ids, regex: 'KRS[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
+      # długość numerów; sum kontrolnych (suma_kontrolna: nip / regon) nie włączamy - numery w danych UZP
+      # są fikcyjne i co trzeci jej nie przechodzi
+      krs: {w: ids, regex: 'KRS[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry, walidacja: {dlugosc: 10}}
       # w układzie "pod blokiem" najpierw nazwa ze zdania "w imieniu ..." (sekcja w_imieniu_po),
       # potem z bloku nagłówka
       nazwa:
@@ -180,8 +186,8 @@ listy:
         regex: '\A\s*([\s\S]+?)\s*\Z'
         # dopisek o roli w konsorcjum, cudzysłowy wokół nazwy, śmieci OCR na końcu
         zamien: [['\s*\((?:lider|partner)[^)]*\)', ''], ['[„”“"]', ''], ['(?:\s+[^\w\s]+)+$', '']]
-      nip: {w: ids, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
-      regon: {w: ids, regex: 'REGON[:\s]*((?:\d[ -]?){8}\d(?:(?:[ -]?\d){5})?)', typ: cyfry}
+      nip: {w: ids, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry, walidacja: {dlugosc: 10}}
+      regon: {w: ids, regex: 'REGON[:\s]*((?:\d[ -]?){8}\d(?:(?:[ -]?\d){5})?)', typ: cyfry, walidacja: {dlugosc: [9, 14]}}
       przez-pelnomocnika: {w: naglowek, mapa: [[1, 'reprezentowan\w*']], domyslnie: 0}
       # imię i nazwisko z wielkiej litery (zaczerniony tekst w skanie daje np. "ij KA")
       pelnomocnik.imie_nazwisko:
@@ -204,11 +210,11 @@ listy:
       - {w: zamawiajacy, regex: *blok_strony}     # zwykły układ
       - {w: zamawiajacy, regex: *blok_luzny}      # adres bez "ul." / wszystko w jednej linii
     pola:
-      krs: {w: ids, regex: 'KRS[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
+      krs: {w: ids, regex: 'KRS[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry, walidacja: {dlugosc: 10}}
       nazwa:
         z_grupy: nazwa
         zamien: [['(?:\s+[^\w\s]+)+$', '']]
-      nip: {w: ids, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
-      regon: {w: ids, regex: 'REGON[:\s]*((?:\d[ -]?){8}\d(?:(?:[ -]?\d){5})?)', typ: cyfry}
+      nip: {w: ids, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry, walidacja: {dlugosc: 10}}
+      regon: {w: ids, regex: 'REGON[:\s]*((?:\d[ -]?){8}\d(?:(?:[ -]?\d){5})?)', typ: cyfry, walidacja: {dlugosc: [9, 14]}}
       # tylko przy kilku zamawiających: 1 = lider / prowadzący (etykieta przed blokiem albo dopisek po nim)
       prowadzacy_postepowanie: {w: dopasowanie, mapa: [[1, 'lider|prowadząc'], [0, 'partner|^']], tylko_gdy_wiele: true}

@@ -71,6 +71,34 @@ Klucz = ścieżka w wynikowym JSON (kropka = zagnieżdżenie), np. `faktura.nume
 | `format` | wartość złożona z grup, np. `'{1}/BZP{2}'` albo z nazwanych `'{nr}-{rok}'` |
 | `pomin` | wzorce fragmentów wymazywanych przed szukaniem (np. dane zamawiającego, żeby nie wziąć ich za stronę) |
 | `z_pola` + `slownik` | wartość wyliczona z innego pola, np. opis z numeru: `z_pola: a.id`, `slownik: {1: Opis 1}` |
+| `walidacja` | warunki dla wartości (patrz niżej); działa też w polach elementów list i w `llm` |
+
+#### `walidacja` – warunki poprawności wartości
+
+```yaml
+  faktura.nip_sprzedawcy:
+    regex: 'NIP:?\s*([\d -]{10,13})'
+    typ: cyfry
+    walidacja: {dlugosc: 10, suma_kontrolna: nip}
+```
+
+| Warunek | Znaczenie |
+|---|---|
+| `dlugosc` | długość wartości (po `typ`, np. same cyfry): `10` albo lista, np. `[9, 14]` dla REGON |
+| `wzorzec` | cała wartość musi pasować do regexu, np. `'\d{4}/BZP\d{8}'` |
+| `wartosci` | lista dozwolonych wartości, np. `[1, 2, 3]` |
+| `zakres` | `[od, do]` dla liczb i dat ISO; `null` = bez ograniczenia, np. `['2021-01-01', null]` |
+| `suma_kontrolna` | `nip` \| `regon` (9 i 14 cyfr) \| `pesel` \| `rachunek` (IBAN / NRB, mod 97) |
+
+Wartość, która nie spełnia warunków, **nie trafia do wyniku**. Program szuka dalej (kolejne trafienie
+regexu, kolejna alternatywa, kolejne źródło), a gdy nic nie przejdzie, pole jest puste albo dostaje
+`domyslnie`. Puste pole może jeszcze uzupełnić model (sekcja `llm`), a jego wartość przechodzi te same
+warunki, jeśli dopisać `walidacja` przy polu w `llm`. Każde odrzucenie trafia do raportu (`run.py --raport`,
+klucz `walidacja`) i do wydruku `nowy_typ.py sprawdz`, z powodem, np. „błędna suma kontrolna (nip)”.
+
+Sumę kontrolną włączaj tylko wtedy, gdy dokumenty zawierają prawdziwe numery. W danych treningowych UZP
+numery są fikcyjne: sumę przechodzi ok. 2/3 NIP-ów i REGON-ów i mniej niż połowa rachunków. Dlatego typy
+konkursowe sprawdzają tylko długość i format, a sumę kontrolną – wyłącznie PESEL (w danych wszystkie poprawne).
 
 Makra w regexach: `{DATA}` (2026-03-21, 21.03.2026, 21/03/2026, 21 marca 2026), `{KWOTA}` (1 200,50),
 `{RACHUNEK}` (NRB z PL i spacjami lub bez). Wielkość liter jest ignorowana; `(?-i:...)` włącza ją lokalnie
@@ -157,6 +185,7 @@ dokumentu, a niepotwierdzona wartość jest odrzucana (widać to w `sprawdz` i w
 | `pola.<ścieżka>.opis` | czego szukać – konkretnie, z nazwą etykiety z dokumentu |
 | `wartosci` | dla `wybor`: lista albo słownik `numer: opis`; `opis_do: ścieżka` wpisze opis wybranego numeru |
 | `tylko_gdy_wiele` | w elemencie listy: pole zerowane, gdy lista ma 1 element (np. „lider”) |
+| `walidacja` | te same warunki co w regułach (`dlugosc`, `wzorzec`, `wartosci`, `zakres`, `suma_kontrolna`), sprawdzane po potwierdzeniu wartości w tekście |
 
 ## Dobre praktyki (także dla asystenta AI)
 

@@ -26,4 +26,4 @@ pola:
     opis: Osoby ustanowione pełnomocnikami.
     element:
       imie_nazwisko: {typ: osoba, opis: Imię i nazwisko pełnomocnika w mianowniku, bez tytułu.}
-      pesel: {typ: cyfry, dlugosc: 11, opis: PESEL, jeśli podany.}
+      pesel: {typ: cyfry, dlugosc: 11, walidacja: {suma_kontrolna: pesel}, opis: "PESEL, jeśli podany."}

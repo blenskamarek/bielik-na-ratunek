@@ -28,10 +28,15 @@ pola:
   faktura.suma_brutto:
     regex: 'do zapłaty\s*:?\s*({KWOTA})'
     typ: kwota
+    walidacja: {zakres: [0.01, null]}                  # kwota dodatnia
 
   faktura.nip_sprzedawcy:
     regex: 'sprzedawca[\s\S]{0,150}?NIP\s*:?\s*(\d{3}[ -]?\d{3}[ -]?\d{2}[ -]?\d{2})'
     typ: cyfry
+    # walidacja (opcjonalnie): wartość niespełniająca warunków jest pomijana, szukanie trwa dalej,
+    # a odrzucenie z powodem trafia do raportu (--raport). Warunki: dlugosc, wzorzec, wartosci,
+    # zakres, suma_kontrolna (nip | regon | pesel | rachunek).
+    walidacja: {dlugosc: 10, suma_kontrolna: nip}
 
   faktura.rodzaj:                  # klasyfikacja wartości: pierwsza pasująca reguła
     mapa:

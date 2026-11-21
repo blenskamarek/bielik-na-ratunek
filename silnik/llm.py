@@ -28,7 +28,7 @@ from typing import Any
 
 import yaml
 
-from silnik.konfig import MAKRA, BladKonfiguracji
+from silnik.konfig import MAKRA, BladKonfiguracji, sprawdz_walidacje, waliduj
 from silnik.narzedzia import WZ_DATA, data_iso, kwota
 
 TYPY_POL = {"tekst", "data", "cyfry", "email", "kwota", "wybor", "osoba", "lista"}
@@ -57,6 +57,8 @@ def sprawdz_konfiguracje_llm(konf: dict, sciezka: str = "llm.pola") -> None:
             raise BladKonfiguracji(f"{miejsce}: typ 'wybor' wymaga listy/słownika 'wartosci'")
         if spec.get("opis_do") and not isinstance(spec.get("wartosci"), dict):
             raise BladKonfiguracji(f"{miejsce}: 'opis_do' wymaga 'wartosci' jako słownika numer: opis")
+        if "walidacja" in spec:
+            sprawdz_walidacje(spec["walidacja"], miejsce)
 
 log = logging.getLogger("odwolania.llm")
 KATALOG = Path(__file__).resolve().parent.parent
@@ -122,7 +124,16 @@ class Weryfikator:
         return False
 
     def sprawdz(self, wartosc: Any, spec: dict) -> tuple[Any, str | None]:
-        """(wartość po normalizacji, None) albo (None, powód odrzucenia)."""
+        """(wartość po normalizacji, None) albo (None, powód odrzucenia): pokrycie w tekście,
+        a potem warunki `walidacja` (te same co w regułach typ.yaml)."""
+        v, powod = self._w_tekscie(wartosc, spec)
+        if v is not None and spec.get("walidacja"):
+            powod = waliduj(v, spec["walidacja"])
+            if powod:
+                return None, powod
+        return v, powod
+
+    def _w_tekscie(self, wartosc: Any, spec: dict) -> tuple[Any, str | None]:
         if wartosc is None or (isinstance(wartosc, str) and not wartosc.strip()):
             return None, None
         typ = spec.get("typ", "tekst")
@@ -403,7 +414,7 @@ def _waliduj_liste(wartosc, spec: dict, wer: Weryfikator, sciezka: str, raport: 
 def _wpis(raport: list, pole: str, z_modelu, przyjete, powod) -> None:
     if z_modelu is None or z_modelu == "":
         return
-    raport.append({"pole": pole, "z_modelu": z_modelu, "przyjete": przyjete is not None,
+    raport.append({"zrodlo": "model", "pole": pole, "z_modelu": z_modelu, "przyjete": przyjete is not None,
                    **({"powod_odrzucenia": powod} if powod else {})})
 
 

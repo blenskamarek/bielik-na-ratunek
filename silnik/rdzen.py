@@ -155,18 +155,21 @@ class Typ:
                 return 0
         return sum(zwarty.count(_zloz(s)) for s in self.konf["slowa_kluczowe"])
 
-    def wynik(self, tekst: str) -> dict:
+    def wynik(self, tekst: str, odrzucone: list | None = None) -> dict:
         if self.ekstraktor:                               # kod ma pierwszeństwo przed konfiguracją
             return self.ekstraktor(tekst) or copy.deepcopy(self.schemat)
         w = copy.deepcopy(self.szkielet) if self.szkielet else copy.deepcopy(self.schemat)
         if self.konf_pola:
-            _scal(w, konfig.ekstrahuj(tekst, self.konf_pola))
+            _scal(w, konfig.ekstrahuj(tekst, self.konf_pola, odrzucone))
         return w
 
     def wynik_z_raportem(self, tekst: str) -> tuple[dict, list[dict]]:
-        """Reguły, potem model językowy dla pól pustych. Raport: wartości od modelu i ich weryfikacja."""
-        w = self.wynik(tekst)
-        raport = llm.uzupelnij(tekst, w, self.konf_llm) if self.konf_llm else []
+        """Reguły, potem model językowy dla pól pustych. Raport: wartości odrzucone przez walidację
+        reguł (zrodlo: reguly) oraz wartości od modelu i ich weryfikacja (zrodlo: model)."""
+        odrzucone: list[dict] = []
+        w = self.wynik(tekst, odrzucone)
+        raport = [{"zrodlo": "reguly", **o, "przyjete": False} for o in odrzucone]
+        raport += llm.uzupelnij(tekst, w, self.konf_llm) if self.konf_llm else []
         return w, raport
 
 
@@ -213,7 +216,11 @@ def przetworz_plik(pdf: Path, wyjscie: Path, typy: dict[str, Typ], raport: Path 
                 raport.parent.mkdir(parents=True, exist_ok=True)
                 raport.write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
             return
-        wynik, info["llm"] = typy[typ].wynik_z_raportem(tekst)
+        wynik, raport_typu = typy[typ].wynik_z_raportem(tekst)
+        info["llm"] = [r for r in raport_typu if r.get("zrodlo") != "reguly"]
+        odrzucone = [r for r in raport_typu if r.get("zrodlo") == "reguly"]
+        if odrzucone:
+            info["walidacja"] = odrzucone             # wartości z reguł odrzucone przez `walidacja`
     except Exception as e:  # noqa: BLE001 - celowo szeroko: ocena automatyczna nie może się wysypać
         log.error("Błąd w %s: %s", pdf, e)
         wynik = {"blad": f"{type(e).__name__}: {e}", "slad": traceback.format_exc(limit=3)}

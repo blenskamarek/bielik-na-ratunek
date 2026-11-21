@@ -149,6 +149,9 @@ def sprawdz(a) -> int:
         wynik, raport = typ.wynik_z_raportem(tekst)
         print(json.dumps(wynik, ensure_ascii=False, indent=2))
         for r in raport:
+            if r.get("zrodlo") == "reguly":             # wartość z reguły odrzucona przez `walidacja`
+                print(f"   walidacja: {r['pole']} = {r['wartosc']!r} -> odrzucone: {r['powod_odrzucenia']}")
+                continue
             print(f"   model: {r['pole']} = {r['z_modelu']!r} -> {'przyjęte' if r['przyjete'] else 'odrzucone: ' + r.get('powod_odrzucenia', '')}")
         oczek = pdf.parent / f"{pdf.stem}.oczekiwany.json"
         if oczek.exists():

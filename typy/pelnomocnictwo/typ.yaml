@@ -72,4 +72,5 @@ listy:
     unikalne_po: [imie_nazwisko]
     pola:
       imie_nazwisko: imie
-      pesel: pesel
+      # PESEL z cyfrą kontrolną: błąd OCR w cyfrze daje puste pole zamiast złego numeru
+      pesel: {z_grupy: pesel, walidacja: {dlugosc: 11, suma_kontrolna: pesel}}

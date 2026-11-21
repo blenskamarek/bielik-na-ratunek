@@ -45,15 +45,18 @@ trzech typów (wyroki i postanowienia KIO, decyzje, ogłoszenia TED, inne pisma)
 ```
 PDF ─▶ tekst (pypdf) ─▶ OCR stron bez tekstu (Tesseract, pol)
     ─▶ klasyfikacja po treści i budowie pisma (typy/*/typ.yaml)  ── obcy dokument ──▶ {}
-    ─▶ reguły z konfiguracji YAML (sekcje, regex, bloki stron, słowniki)
-    ─▶ Bielik 11B tylko dla pól pustych po regułach ─▶ weryfikacja każdej wartości w tekście
-    ─▶ JSON (+ opcjonalny raport: co podał model, co przyjęto, dlaczego odrzucono)
+    ─▶ reguły z konfiguracji YAML (sekcje, regex, bloki stron, słowniki) ─▶ walidacja z YAML
+    ─▶ Bielik 11B tylko dla pól pustych po regułach ─▶ weryfikacja każdej wartości w tekście + walidacja
+    ─▶ JSON (+ opcjonalny raport: co odrzuciła walidacja, co podał model, co przyjęto, dlaczego odrzucono)
 ```
 
 - **Reguły przed modelem.** Daty, kwoty, numery, NIP/KRS/REGON i rachunki wycina program z tekstu; model nigdy
   ich nie „przepisuje”. Na danych treningowych reguły same dają F1 = 1,000.
 - **Kontrola źródła.** Wartość od modelu jest przyjmowana tylko, gdy występuje w dokumencie (tekst, data,
   cyfry, e-mail, kwota) albo na zamkniętej liście (np. kod czynności 1–12). Niepotwierdzona – odrzucana.
+- **Walidacja w konfiguracji.** Przy każdym polu (z reguł i od modelu) można w YAML dopisać warunki:
+  długość, wzorzec, dozwolone wartości, zakres (liczby, daty), sumę kontrolną NIP / REGON / PESEL / IBAN.
+  Wartość, która ich nie spełnia, nie trafia do wyniku, a raport podaje powód.
 - **Wszystkie typy dokumentów to konfiguracja YAML**, bez kodu w `typy/` (patrz „Nowy typ dokumentu”).
 
 ## Model językowy (LLM)
@@ -107,8 +110,16 @@ układ), a realny dokument jest jeden. To sprawdzian odporności, nie pomiar na 
 
 ## Nowy typ dokumentu – bez zmian w kodzie
 
-Typ dokumentu = plik `typy/<nazwa>/typ.yaml` (klasyfikacja, reguły, opisy pól dla modelu). Administrator
-(sam lub z asystentem AI, np. Claude) dodaje go tak:
+Typ dokumentu = plik `typy/<nazwa>/typ.yaml`. W konfiguracji, bez kodu, ustawia się:
+
+| Co | Klucze YAML |
+|---|---|
+| rozpoznawanie typu | `klasyfikacja`: słowa kluczowe, wzorce wymagane i wykluczające, okna tekstu |
+| mapowanie pól | `pola` / `listy`: ścieżka w JSON → regex, sekcja, `format`, `mapa`, `slownik`, `z_pola` |
+| walidacja | `walidacja` przy polu: `dlugosc`, `wzorzec`, `wartosci`, `zakres`, `suma_kontrolna` |
+| model językowy | `llm`: opisy pól, typy, dozwolone wartości, ta sama `walidacja` |
+
+Administrator (sam lub z asystentem AI, np. Claude) dodaje typ tak:
 
 ```powershell
 py narzedzia\nowy_typ.py nowy faktura --pdf przyklad.pdf --wzorzec oczekiwany.json   # szkielet
