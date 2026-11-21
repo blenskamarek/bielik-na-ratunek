@@ -1,0 +1,9 @@
+<?php
+// Skopiuj jako kolejka_konfig.php (obok kolejka.php) i wpisz klucze.
+// Klucze wygeneruj na swoim komputerze: py narzedzia\pracownik_kolejki.py --nowe-klucze
+// Ten plik jest wykonywany przez PHP, więc z przeglądarki nie da się go odczytać.
+return array(
+    'klucz_klienta' => 'WPISZ-KLUCZ-KLIENTA',         // trafia do programu sędziego (plik llm.klucz)
+    'klucz_pracownika' => 'WPISZ-KLUCZ-PRACOWNIKA',   // zostaje tylko na komputerze z Bielikiem
+    // 'katalog' => '/home/UZYTKOWNIK/bielik_kolejka_dane',  // opcjonalnie: własny katalog danych
+);

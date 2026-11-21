@@ -1,0 +1,4 @@
+# Wariant lokalny do testow (kontekst 8192; -cpu = bez GPU)
+FROM SpeakLeash/bielik-11b-v3.1-instruct:Q4_K_M
+PARAMETER num_ctx 8192
+PARAMETER num_gpu 0

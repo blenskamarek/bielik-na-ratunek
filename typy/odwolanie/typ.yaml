@@ -1,0 +1,160 @@
+# Odwołanie do Prezesa KIO - typ opisany wyłącznie konfiguracją (bez kodu).
+# Struktura wyniku wg specyfikacji organizatora (oczekiwane-json/odwolanie.json).
+# Wzorce uwzględniają skany (OCR): śmieci na początku linii ([^\w\n]{0,4}), zamienione znaki (1/|, r/t, S/5).
+
+klasyfikacja:
+  slowa_kluczowe: [odwołanie, odwołując, krajowej izby odwoławczej, zarzut, pzp]
+  wymagane_na_poczatku: [odwołanie, odwołujący]
+  okno_poczatku: 2000
+  ogranicz_do_znakow: 100000
+  # budowa pisma (dokumenty negatywne UZP: wyrok/postanowienie KIO, decyzje, rozporządzenie, prezentacja):
+  # etykieta strony "Odwołujący" na początku linii ORAZ tytuł "ODWOŁANIE" albo adresat Prezes KIO
+  # [^\w\n]{0,3}: OCR potrafi wstawić śmieć przed etykietą (np. „Odwołujący:)
+  wymagane_wzorce:
+    - '^[^\w\n]{0,3}(?-i:Odwo[łl]uj[ąa]c[ya]|ODWO[ŁL]UJ[ĄA]C[YA])\b'
+    - '^[^\w\n]{0,3}(?-i:O ?D ?W ?O ?[ŁL] ?A ?N ?I ?E)[^\w\n]{0,3}$|Prezes\w*\s+Krajowej\s+Izby\s+Odwo[łl]awczej'
+  okno_wzorcow: 4000
+  # tytuł innego rodzaju pisma w pierwszych liniach = to nie jest odwołanie
+  wykluczajace_wzorce:
+    - '^[ \t]*(?-i:WYROK|POSTANOWIENIE|ROZPORZĄDZENIE|DECYZJA|UCHWAŁA|OBWIESZCZENIE)\b'
+    - '^[ \t]*Sygn\.\s*akt'
+  okno_wykluczen: 1000
+
+# Pomocnicze fragmenty tekstu (nie trafiają do wyniku).
+sekcje:
+  # wszystko przed "dotyczy:" - strony postępowania
+  naglowek:
+    regex: '\A([\s\S]*?)(?=^[^\w\n]{0,3}dotyczy\b|\Z)'
+  # blok strony: od etykiety (nazwa może być w tej samej linii) do etykiety innej roli
+  odwolujacy:
+    w: naglowek
+    regex: '^[^\w\n]{0,3}Odwołujący\b[ \t]*:?[ \t]*([\s\S]*?)(?=^[^\w\n]{0,3}(?:\d+\)[ \t]*)?(?:Zamawiający|Wykonawca|Uczestnik|Przystępując)|^[^\w\n]{0,3}(?:Prezes\w*\s+Krajowej|Krajowa\s+Izba|(?-i:O ?D ?W ?O ?Ł ?A ?N ?I ?E)\s*$)|\Z)'
+  zamawiajacy:
+    w: naglowek
+    regex: '^[^\w\n]{0,3}Zamawiający\b(?![ \t]+w dniu)[ \t]*:?[ \t]*([\s\S]*?)(?=^[^\w\n]{0,3}(?:\d+\)[ \t]*)?(?:Odwołujący|Wykonawca|Uczestnik|Przystępując)|^[^\w\n]{0,3}(?:Prezes\w*\s+Krajowej|Krajowa\s+Izba|(?-i:O ?D ?W ?O ?Ł ?A ?N ?I ?E)\s*$)|\Z)'
+  # "dotyczy: ... pn. „tytuł” nr referencyjny ..., BZP ..., TED ..." aż do treści odwołania
+  dotyczy:
+    szukaj_w: plaski
+    regex: '(\bdotyczy\b.*?)(?=Działając w imieniu|(?-i:O ?D ?W ?O ?Ł ?A ?N ?I ?E)|$)'
+  # czynność zaskarżona pierwszym zarzutem: 1. punkt listy zaskarżonych czynności
+  pierwszy_zarzut:
+    szukaj_w: plaski
+    regex:
+      - '(?-i:polegających na:)\s*(?:Strona \d+ z \d+\s*)?1\)\s*(.*?)(?=;|\s2\)\s)'
+      # "wnoszę odwołanie wobec: 1. ..." (w skanie przed "1." bywa wtrącona stopka strony, "1" bywa "|")
+      - 'wnoszę odwołanie\s+(?:wobec|od)\b[^:]{0,60}:\s*(?:.{0,300}?\s)??(?-i:1|\||l|I)[.)]\s*(?!\d)(.*?)(?=;|\s2[.,)]\s)'
+  # ... albo zdanie "Zamawiający w dniu <data> ..."
+  zdanie_czynnosc:
+    szukaj_w: plaski
+    regex: '((?-i:Zamawiający) w dniu [^.]*?\.)(?= (?-i:[A-ZŁ]))'
+
+pola:
+  # nagłówek pisma: linia "Miejscowość, dnia <data> r."
+  OdwolanieKIO.data:
+    regex: '^[ \t]*[^\W\d_][\w .\-]*?,[ \t]*(?:dnia[ \t]+)?({DATA})(?:[ \t]+r(?:oku|\.))?[ \t]*$'
+    typ: data
+  OdwolanieKIO.miejscowosc:
+    regex: '^[ \t]*([^\W\d_][\w .\-]*?),[ \t]*(?:dnia[ \t]+)?(?:{DATA})(?:[ \t]+r(?:oku|\.))?[ \t]*$'
+  OdwolanieKIO.czynnosc_dzien:
+    w: [pierwszy_zarzut, zdanie_czynnosc]
+    regex: '({DATA})'
+    typ: data
+  # rodzaj czynności: pierwsza pasująca reguła (zaniechania przed decyzjami!)
+  OdwolanieKIO.czynnosc_powod_id:
+    w: [pierwszy_zarzut, zdanie_czynnosc]
+    mapa:
+      - [10, 'zaniecha\w* unieważnieni|zaniechani\w* unieważnieni']
+      - [9, 'unieważni']
+      - [7, 'nie odrzuci|zaniecha\w* odrzuceni|zaniechani\w* odrzuceni']
+      - [8, 'nie wykluczy|zaniecha\w* wykluczeni|zaniechani\w* wykluczeni']
+      - [1, 'odrzuci|odrzuc']
+      - [3, 'wykluczy|wykluczeni']
+      - [2, 'wyborz|wybór|wyboru|wybrał|ogłosił wybór']
+      # 12 = projektowane postanowienia umowy (także jako "załącznik do SWZ");
+      # "treść SWZ ... w zakresie wzoru umowy" to 4 (wzorce, przykłady 42 i 54)
+      - [12, 'projektowan\w* postanowie\w* umowy|\bppu\b']
+      - [5, 'zmodyfikow|modyfikacj']
+      - [6, 'odpowiedzi|wyjaśnieni']
+      - [11, 'opis\w* przedmiotu zamówienia|\bopz\b']
+      - [4, 'specyfikacj|\bswz\b|opublikow|publikacj']
+  # słownik organizatora: oczekiwane-json/czynnosc_powod_id_dict.md (opisy 1:1, także "/" w id 6)
+  OdwolanieKIO.czynnosc_opis:
+    z_pola: OdwolanieKIO.czynnosc_powod_id
+    slownik:
+      1: Decyzja o odrzuceniu oferty
+      2: Ogłoszenie wyboru oferty
+      3: Decyzja o wykluczeniu wykonawcy
+      4: Publikacja specyfikacji warunków zamówienia (SWZ)
+      5: Modyfikacja treści SWZ
+      6: Odpowiedzi/wyjaśnienia do SWZ
+      7: Zaniechanie odrzucenia oferty
+      8: Zaniechanie wykluczenia wykonawcy
+      9: Decyzja o unieważnieniu postępowania
+      10: Zaniechanie unieważnienia postępowania
+      11: Opis przedmiotu zamówienia (OPZ)
+      12: Projektowane postanowienia umowy
+
+  ZamowieniePubliczne.numer_bzp:
+    w: dotyczy
+    regex: '(\d{4})\s?/\s?BZP\s?((?:\d\s?){7}\d)(\s?/\s?\d{2})?'
+    format: '{1}/BZP{2}{3}'
+    zamien: [['\s', '']]          # OCR wstawia spacje między cyfry
+  ZamowieniePubliczne.numer_postepowania:
+    w: dotyczy
+    regex:   # wartość musi zawierać cyfrę; kropka na końcu nie należy do numeru; OCR: "nt" zamiast "nr"
+      - 'n[rt] referencyjny(?: sprawy)?:?\s*((?=[^\s,;()]*\d)[^\s,;()]*[^\s,;().])'
+      - '(?:znak sprawy|numer postępowania|nr postępowania|nr sprawy|numer referencyjny):?\s*((?=[^\s,;()]*\d)[^\s,;()]*[^\s,;().])'
+      - 'postępowani\w* nr:?\s*((?=[^\s,;()]*\d)[^\s,;()]*[^\s,;().])'
+  ZamowieniePubliczne.numer_ted:
+    w: dotyczy
+    regex:       # "2026/S 142-999327" (OCR: "2026/58 142-", "2026/S5 142-") i "nr 999327-2026" -> "999327-2026"
+      - '(?P<rok>\d{4})\s?/\s?[S5]\S?\s?\d{3}\s?-\s?(?P<nr>\d{6})'
+      - '(?:TED|Dzienniku Urzędowym|Unii Europejskiej)\D{0,60}(?P<nr>\d{6})\s?-\s?(?P<rok>\d{4})'
+    format: '{nr}-{rok}'
+  ZamowieniePubliczne.tytul:
+    w: dotyczy
+    regex:       # tytuł w cudzysłowie; w skanie bywa ",," zamiast „ albo brak otwierającego cudzysłowu
+      - '„\s*([^”"„]+?)\s*[”"]'
+      - 'pn\.\s*(?:[„"“,]{1,2}\s*)?([^”"„]+?)\s*[”"]'
+
+listy:
+  # blok strony: [etykieta:] nazwa (1-3 linie, może być w linii etykiety) / adres: ulica (+ linia z kodem)
+  # / 0..n linii z KRS-NIP-REGON / [e-mail] / [dopisek o prowadzącym postępowanie]
+  Odwolujacy:
+    w: odwolujacy
+    max: 1                      # przy konsorcjum tylko pierwszy blok = lider
+    regex: &blok_strony '(?:^[^\w\n]{0,3}(?P<etykieta>[^\n]*:)[ \t]*\n)?^[^\w\n]{0,4}(?:\d\)[ \t]*)?(?P<nazwa>(?![^\w\n]{0,4}(?:ul|al|pl|os)\.\s)(?![^\w\n]{0,4}(?:Zamawiając|Odwołując|Wykonawc|Konsorcjum|Lider|Partner|reprezentowan|adres do|tel\.|e-?mail))(?![^\n]*:[ \t]*$)(?![^\n]*(?:\b(?:KRS|NIP|REGON)\b|@|Izby\s+Odwo))[^\n]*\w[^\n]*(?:\n(?![^\w\n]{0,4}(?:ul|al|pl|os)\.\s)(?![^\n]*(?:\b(?:KRS|NIP|REGON)\b|e-?mail|\btel\.|\b\d{2}-\d{3}\b|:[ \t]*$))[^\n]*\w[^\n]*){0,2})[ \t]*\n^[^\w\n]{0,4}(?:ul|al|pl|os)\.\s[^\n]*(?:\n|\Z)(?:^(?![^\n]*\b(?:KRS|NIP|REGON)\b)[^\n]*\b\d{2}-\d{3}\b[^\n]*(?:\n|\Z))?(?P<ids>(?:^[^\n]*\b(?:KRS|NIP|REGON)\b[^\n]*(?:\n|\Z))*)(?:^[^\n]*e-?mail[^\n]*(?:\n|\Z))?(?P<dopisek>^[^\w\n]{0,4}Zamawiający\s+prowadząc[^\n]*)?'
+    pola:
+      krs: {w: ids, regex: 'KRS[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
+      nazwa:
+        z_grupy: nazwa
+        zamien: [['\s*\((?:lider|partner)[^)]*\)', ''], ['(?:\s+[^\w\s]+)+$', '']]   # dopisek o roli w konsorcjum, śmieci OCR
+      nip: {w: ids, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
+      regon: {w: ids, regex: 'REGON[:\s]*((?:\d[ -]?){8}\d(?:(?:[ -]?\d){5})?)', typ: cyfry}
+      przez-pelnomocnika: {w: naglowek, mapa: [[1, 'reprezentowan\w*']], domyslnie: 0}
+      pelnomocnik.imie_nazwisko:
+        w: naglowek
+        szukaj_w: plaski
+        regex: 'reprezentowan\w*\b(?:(?!adres do korespondencji|tel\.).){0,80}?(?:\badw\.|\badwokat\w*|\br\.\s?pr\.|\bradc\w*\s+prawn\w*|\bmec\.)\s+([^\W\d_]+(?:-[^\W\d_]+)* [^\W\d_]+(?:-[^\W\d_]+)*)'
+      pelnomocnik.nazwa:
+        w: naglowek
+        szukaj_w: plaski
+        regex: 'adres do korespondencji:?\s*(.+?),?\s+(?:ul|al|pl|os)\.\s'
+        zamien: [['^[^\w]+', ''], ['(?:\s+[^\w\s]+)+$', '']]   # śmieci OCR na początku i końcu
+      pelnomocnik.mail:
+        w: naglowek
+        szukaj_w: plaski
+        regex: 'adres do korespondencji.*?([\w.+-]+@[\w-]+(?:\.[\w-]+)+)'
+
+  Zamawiajacy:
+    w: zamawiajacy
+    regex: *blok_strony
+    pola:
+      krs: {w: ids, regex: 'KRS[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
+      nazwa:
+        z_grupy: nazwa
+        zamien: [['(?:\s+[^\w\s]+)+$', '']]
+      nip: {w: ids, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry}
+      regon: {w: ids, regex: 'REGON[:\s]*((?:\d[ -]?){8}\d(?:(?:[ -]?\d){5})?)', typ: cyfry}
+      # tylko przy kilku zamawiających: 1 = lider / prowadzący (etykieta przed blokiem albo dopisek po nim)
+      prowadzacy_postepowanie: {w: dopasowanie, mapa: [[1, 'lider|prowadząc'], [0, 'partner|^']], tylko_gdy_wiele: true}

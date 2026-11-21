@@ -1,0 +1,3 @@
+# Wariant na GPU 8 GB: kontekst 6144 miesci sie w VRAM razem z modelem
+FROM SpeakLeash/bielik-11b-v3.1-instruct:Q4_K_M
+PARAMETER num_ctx 6144

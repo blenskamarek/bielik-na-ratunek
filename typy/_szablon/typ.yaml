@@ -1,0 +1,48 @@
+# SZABLON NOWEGO TYPU DOKUMENTU
+# Katalogi zaczynające się od "_" są pomijane. Aby dodać typ:
+#   1) skopiuj ten katalog do typy/<nazwa_typu>/
+#   2) uzupełnij klasyfikację i pola
+#   3) uruchom: python run.py --wejscie input --wyjscie output
+# Żadnych zmian w kodzie. Przykład działającego typu: typy/przelew/typ.yaml
+
+klasyfikacja:
+  # Typ z największą liczbą trafień wygrywa. Spacje w tekście są ignorowane
+  # (łapie też tytuły rozstrzelone "F A K T U R A").
+  slowa_kluczowe: [faktura vat, nabywca, sprzedawca]
+  ogranicz_do_znakow: 100000      # ile początkowych znaków przeszukać
+  # Warunek konieczny (opcjonalny): któryś zwrot musi wystąpić na początku dokumentu.
+  # Chroni przed dokumentami obcymi, które tylko wspominają słowa kluczowe w treści.
+  wymagane_na_poczatku: [faktura]
+  okno_poczatku: 2000
+
+pola:
+  # Klucz = ścieżka w wynikowym JSON-ie (kropka = zagnieżdżenie).
+  faktura.numer:
+    regex: 'faktura(?: vat)?\s+nr\s+([A-Z0-9/\-]+)'   # grupa 1 = wartość
+    typ: tekst                                         # tekst | data | kwota | liczba | cyfry | rachunek | bool
+
+  faktura.data_wystawienia:
+    regex: 'data wystawienia\s*:?\s*({DATA})'          # {DATA} = data w trzech zapisach
+    typ: data                                          # zapisze jako RRRR-MM-DD
+
+  faktura.suma_brutto:
+    regex: 'do zapłaty\s*:?\s*({KWOTA})'
+    typ: kwota
+
+  faktura.nip_sprzedawcy:
+    regex: 'sprzedawca[\s\S]{0,150}?NIP\s*:?\s*(\d{3}[ -]?\d{3}[ -]?\d{2}[ -]?\d{2})'
+    typ: cyfry
+
+  faktura.rodzaj:                  # klasyfikacja wartości: pierwsza pasująca reguła
+    mapa:
+      - [korekta, 'faktura korygująca']
+      - [zwykla, 'faktura vat']
+    domyslnie: null
+
+listy:
+  # Lista obiektów: jeden obiekt na każde dopasowanie regexu (grupy nazwane -> pola).
+  faktura.pozycje:
+    regex: '^\d+\.\s+(?P<nazwa>.+?)\s+(?P<ilosc>\d+)\s+szt\.\s+(?P<cena>{KWOTA})$'
+    pola: {nazwa: nazwa, ilosc: ilosc, cena: cena}
+    typy: {ilosc: liczba, cena: kwota}
+    unikalne: true

@@ -1,0 +1,29 @@
+# Pola pełnomocnictwa, które model może uzupełnić, gdy reguły ich nie znalazły.
+opis_dokumentu: Pełnomocnictwo udzielone przez wykonawcę (mocodawcę) pełnomocnikom do postępowania przed KIO.
+
+fragmenty:
+  - {od: '\A', znakow: 6000}
+
+pola:
+  mocodawca:
+    typ: lista
+    max: 5
+    opis: Podmiot(y) udzielające pełnomocnictwa (przy konsorcjum każdy członek osobno).
+    element:
+      data.nazwa: {typ: tekst, opis: Pełna nazwa mocodawcy.}
+      data.krs: {typ: cyfry, dlugosc: 10, opis: KRS mocodawcy.}
+      data.nip: {typ: cyfry, dlugosc: 10, opis: NIP mocodawcy.}
+      data.typ: {typ: wybor, wartosci: [osoba_prawna, osoba_fizyczna], opis: Rodzaj mocodawcy.}
+      data.imie_nazwisko: {typ: osoba, opis: Imię i nazwisko — tylko gdy mocodawca jest osobą fizyczną.}
+      podpisujacy:
+        typ: lista
+        opis: Osoby podpisujące w imieniu tego mocodawcy.
+        element:
+          imie_nazwisko: {typ: osoba, opis: Imię i nazwisko.}
+  pelnomocnicy:
+    typ: lista
+    max: 10
+    opis: Osoby ustanowione pełnomocnikami.
+    element:
+      imie_nazwisko: {typ: osoba, opis: Imię i nazwisko pełnomocnika w mianowniku, bez tytułu.}
+      pesel: {typ: cyfry, dlugosc: 11, opis: PESEL, jeśli podany.}

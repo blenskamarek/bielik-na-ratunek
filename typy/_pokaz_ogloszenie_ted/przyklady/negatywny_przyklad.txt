@@ -1,0 +1,447 @@
+364525-2025 Page 1/9
+2.1.6.
+2.1.4.
+2.1.2.
+2.1.1.
+2.1.
+1.1.
+See the notice on TED website 
+364525-2025 - Procedura konkurencyjna
+Polska – Serwery – Dostawa, wdrożenie, skonfigurowanie serwerowego środowiska 
+teleinformatycznego wraz z serwisem i gwarancją
+OJ S 107/2025 05/06/2025
+Ogłoszenie o zamówieniu lub ogłoszenie o koncesji – tryb standardowy
+Dostawy - Usługi
+1. Nabywca
+Nabywca
+Oficjalna nazwa: Narodowy Instytut Kardiologii Stefana Kardynała Wyszyńskiego - Państwowy 
+Instytut Badawczy
+E-mail: zamowieniapubliczne@ikard.pl
+Status prawny nabywcy: Podmiot prawa publicznego
+Sektor działalności instytucji zamawiającej: Zdrowie
+2. Procedura
+Procedura
+Tytuł: Dostawa, wdrożenie, skonfigurowanie serwerowego środowiska teleinformatycznego 
+wraz z serwisem i gwarancją
+Opis: Przedmiotem zamówienia jest przygotowanie środowiska teleinformatycznego, na 
+potrzeby realizacji zadań instytutu, zbudowanego w oparciu o dostarczone urządzenia 
+sprzętowe i oprogramowanie.
+Identyfikator procedury: 49cc9072-820d-4a57-988e-7d086ec7f3fd
+Wewnętrzny identyfikator: ZP.039.2025
+Rodzaj procedury: Otwarta
+Procedura jest przyspieszona: nie
+Przeznaczenie
+Charakter zamówienia: Dostawy
+Główna klasyfikacja (cpv): 48820000 Serwery
+, Dodatkowa klasyfikacja (cpv): 48732000 Pakiety oprogramowania do zabezpieczania danych
+, 30233141 Nadmiarowa macierz niezależnych dysków (RAID) 48800000 Systemy i serwery 
+, , informacyjne 32425000 Sieciowy system operacyjny 31154000 Bezprzestojowe źródła energii
+, , 30234500 Pamięci do przechowywania danych 72253200 Usługi w zakresie wsparcia 
+, , systemu 50312300 Konserwacja i naprawa sieciowego sprzętu do przetwarzania danych
+, 45314300 Instalowanie infrastruktury okablowania 72265000 Usługi konfiguracji 
+oprogramowania
+Miejsce realizacji
+Podpodział krajowy (NUTS): Miasto Warszawa (PL911)
+Kraj: Polska
+Informacje ogólne
+Podstawa prawna: 
+Dyrektywa 2014/24/UE
+Podstawy wykluczenia
+Powody wykluczenia źródła: Uwaga
+364525-2025 Page 2/9
+Udział w organizacji przestępczej: Wykonawca zostanie wykluczony z postępowania na 
+podstawie art. 108 ust. 1 pkt 1 Ustawy Prawo Zamówień Publicznych, którego skazano 
+prawomocnie za przestępstwo wskazane w art. 258 Kodeksu karnego lub odpowiedni czyn 
+zabroniony określony w przepisach prawa obcego. Wykonawca zostanie wykluczony z 
+postępowania na podstawie art. 108 ust. 1 pkt 2 Ustawy Prawo Zamówień Publicznych, jeżeli 
+urzędującego członka jego organu zarządzającego lub nadzorczego, wspólnika spółki w 
+spółce jawnej lub partnerskiej albo komplementariusza w spółce komandytowej lub 
+komandytowo-akcyjnej lub prokurenta prawomocnie skazano za przestępstwo wskazane w 
+art. 108 ust. 1 pkt 1 Ustawy Prawo Zamówień Publicznych. Zamawiający przed wyborem 
+najkorzystniejszej oferty wezwie Wykonawcę, którego oferta została najwyżej oceniona, do 
+złożenia w wyznaczonym terminie, nie krótszym niż 10 dni, aktualnych na dzień złożenia: 1) 
+Informacji z Krajowego Rejestru Karnego w zakresie art. 108 ust. 1 pkt 1 ustawy Pzp - 
+sporządzona nie wcześniej niż 6 miesięcy przed jej złożeniem; 2) Informacji z Krajowego 
+Rejestru Karnego w zakresie art. 108 ust. 1 pkt 2 ustawy Pzp - sporządzona nie wcześniej niż 
+6 miesięcy przed jej złożeniem.
+Korupcja: Wykonawca zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 pkt 1 
+Ustawy Prawo Zamówień Publicznych, którego skazano prawomocnie za przestępstwo 
+określone w art. 228-230a lub 250a Kodeksu karnego, art. 46 lub 48 ustawy o sporcie lub art. 
+54 ust. 1-4 ustawy o refundacji leków, środków spożywczych specjalnego przeznaczenia 
+żywieniowego oraz wyrobów medycznych lub odpowiedni czyn zabroniony określony w 
+przepisach prawa obcego. Wykonawca zostanie wykluczony z postępowania na podstawie art. 
+108 ust. 1 pkt 2 Ustawy Prawo Zamówień Publicznych, jeżeli urzędującego członka jego 
+organu zarządzającego lub nadzorczego, wspólnika spółki w spółce jawnej lub partnerskiej 
+albo komplementariusza w spółce komandytowej lub komandytowo-akcyjnej lub prokurenta 
+prawomocnie skazano za przestępstwo wskazane w art. 108 ust. 1 pkt 1 Ustawy Prawo 
+Zamówień Publicznych. Zamawiający przed wyborem najkorzystniejszej oferty wezwie 
+Wykonawcę, którego oferta została najwyżej oceniona, do złożenia w wyznaczonym terminie, 
+nie krótszym niż 10 dni, aktualnych na dzień złożenia: 1) Informacji z Krajowego Rejestru 
+Karnego w zakresie art. 108 ust. 1 pkt 1 ustawy Pzp - sporządzona nie wcześniej niż 6 
+miesięcy przed jej złożeniem; 2) Informacji z Krajowego Rejestru Karnego w zakresie art. 108 
+ust. 1 pkt 2 ustawy Pzp - sporządzona nie wcześniej niż 6 miesięcy przed jej złożeniem.
+Nadużycia: Wykonawca zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 pkt 
+1 Ustawy Prawo Zamówień Publicznych, którego skazano prawomocnie za przestępstwo 
+określone przeciwko obrotowi gospodarczemu, o którym mowa w art. 296-307 Kodeksu 
+karnego, przestępstwo oszustwa, o którym mowa w art. 286 Kodeksu karnego, przestępstwo 
+przeciwko wiarygodności dokumentów, o których mowa w art. 270-277d Kodeksu karnego, lub 
+przestępstwo skarbowe lub odpowiedni czyn zabroniony określony w przepisach prawa 
+obcego. Wykonawca zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 pkt 2 
+Ustawy Prawo Zamówień Publicznych, jeżeli urzędującego członka jego organu 
+zarządzającego lub nadzorczego, wspólnika spółki w spółce jawnej lub partnerskiej albo 
+komplementariusza w spółce komandytowej lub komandytowo-akcyjnej lub prokurenta 
+prawomocnie skazano za przestępstwo wskazane w art. 108 ust. 1 pkt 1 Ustawy Prawo 
+Zamówień Publicznych. Zamawiający przed wyborem najkorzystniejszej oferty wezwie 
+Wykonawcę, którego oferta została najwyżej oceniona, do złożenia w wyznaczonym terminie, 
+nie krótszym niż 10 dni, aktualnych na dzień złożenia: 1) Informacji z Krajowego Rejestru 
+Karnego w zakresie art. 108 ust. 1 pkt 1 ustawy Pzp - sporządzona nie wcześniej niż 6 
+miesięcy przed jej złożeniem; 2) Informacji z Krajowego Rejestru Karnego w zakresie art. 108 
+ust. 1 pkt 2 ustawy Pzp - sporządzona nie wcześniej niż 6 miesięcy przed jej złożeniem.
+Przestępstwa terrorystyczne lub przestępstwa związane z działalnością terrorystyczną: 
+Wykonawca zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 pkt 1 Ustawy 
+364525-2025 Page 3/9
+Prawo Zamówień Publicznych, którego skazano prawomocnie za przestępstwo o charakterze 
+terrorystycznym, o którym mowa w art. 115 § 20 Kodeksu karnego, lub mające na celu 
+popełnienie tego przestępstwa lub odpowiedni czyn zabroniony określony w przepisach prawa 
+obcego. Wykonawca zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 pkt 2 
+Ustawy Prawo Zamówień Publicznych, jeżeli urzędującego członka jego organu 
+zarządzającego lub nadzorczego, wspólnika spółki w spółce jawnej lub partnerskiej albo 
+komplementariusza w spółce komandytowej lub komandytowo-akcyjnej lub prokurenta 
+prawomocnie skazano za przestępstwo wskazane w art. 108 ust. 1 pkt 1 Ustawy Prawo 
+Zamówień Publicznych. Zamawiający przed wyborem najkorzystniejszej oferty wezwie 
+Wykonawcę, którego oferta została najwyżej oceniona, do złożenia w wyznaczonym terminie, 
+nie krótszym niż 10 dni, aktualnych na dzień złożenia: 1) Informacji z Krajowego Rejestru 
+Karnego w zakresie art. 108 ust. 1 pkt 1 ustawy Pzp - sporządzona nie wcześniej niż 6 
+miesięcy przed jej złożeniem; 2) Informacji z Krajowego Rejestru Karnego w zakresie art. 108 
+ust. 1 pkt 2 ustawy Pzp - sporządzona nie wcześniej niż 6 miesięcy przed jej złożeniem.
+Pranie pieniędzy lub finansowanie terroryzmu: Wykonawca zostanie wykluczony z 
+postępowania na podstawie art. 108 ust. 1 pkt 1 Ustawy Prawo Zamówień Publicznych, 
+którego skazano prawomocnie za przestępstwo finansowania przestępstwa o charakterze 
+terrorystycznym, o którym mowa w art. 165a Kodeksu karnego, lub przestępstwo 
+udaremniania lub utrudniania stwierdzenia przestępnego pochodzenia pieniędzy lub 
+ukrywania ich pochodzenia, o którym mowa w art. 299 Kodeksu karnego lub odpowiedni czyn 
+zabroniony określony w przepisach prawa obcego. Wykonawca zostanie wykluczony z 
+postępowania na podstawie art. 108 ust. 1 pkt 2 Ustawy Prawo Zamówień Publicznych, jeżeli 
+urzędującego członka jego organu zarządzającego lub nadzorczego, wspólnika spółki w 
+spółce jawnej lub partnerskiej albo komplementariusza w spółce komandytowej lub 
+komandytowo-akcyjnej lub prokurenta prawomocnie skazano za przestępstwo wskazane w 
+art. 108 ust. 1 pkt 1 Ustawy Prawo Zamówień Publicznych. Zamawiający przed wyborem 
+najkorzystniejszej oferty wezwie Wykonawcę, którego oferta została najwyżej oceniona, do 
+złożenia w wyznaczonym terminie, nie krótszym niż 10 dni, aktualnych na dzień złożenia: 1) 
+Informacji z Krajowego Rejestru Karnego w zakresie art. 108 ust. 1 pkt 1 ustawy Pzp - 
+sporządzona nie wcześniej niż 6 miesięcy przed jej złożeniem; 2) Informacji z Krajowego 
+Rejestru Karnego w zakresie art. 108 ust. 1 pkt 2 ustawy Pzp - sporządzona nie wcześniej niż 
+6 miesięcy przed jej złożeniem.
+Praca dzieci i inne formy handlu ludźmi: Wykonawca zostanie wykluczony z postępowania na 
+podstawie art. 108 ust. 1 pkt 1 Ustawy Prawo Zamówień Publicznych, którego skazano 
+prawomocnie za przestępstwo powierzenia wykonywania pracy małoletniemu cudzoziemcowi, 
+o którym mowa w art. 9 ust. 2 ustawy z dnia 15 czerwca 2012 r. o skutkach powierzania 
+wykonywania pracy cudzoziemcom przebywającym wbrew przepisom na terytorium 
+Rzeczypospolitej Polskiej lub odpowiedni czyn zabroniony określony w przepisach prawa 
+obcego. Wykonawca zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 pkt 2 
+Ustawy Prawo Zamówień Publicznych, jeżeli urzędującego członka jego organu 
+zarządzającego lub nadzorczego, wspólnika spółki w spółce jawnej lub partnerskiej albo 
+komplementariusza w spółce komandytowej lub komandytowo-akcyjnej lub prokurenta 
+prawomocnie skazano za przestępstwo wskazane w art. 108 ust. 1 pkt 1 Ustawy Prawo 
+Zamówień Publicznych. Zamawiający przed wyborem najkorzystniejszej oferty wezwie 
+Wykonawcę, którego oferta została najwyżej oceniona, do złożenia w wyznaczonym terminie, 
+nie krótszym niż 10 dni, aktualnych na dzień złożenia: 1) Informacji z Krajowego Rejestru 
+Karnego w zakresie art. 108 ust. 1 pkt 1 ustawy Pzp - sporządzona nie wcześniej niż 6 
+miesięcy przed jej złożeniem; 2) Informacji z Krajowego Rejestru Karnego w zakresie art. 108 
+ust. 1 pkt 2 ustawy Pzp - sporządzona nie wcześniej niż 6 miesięcy przed jej złożeniem.
+364525-2025 Page 4/9
+Naruszenie zobowiązania dotyczącego płatności podatków: Wykonawca zostanie wykluczony 
+z postępowania na podstawie art. 108 ust. 1 pkt 3 Ustawy Prawo Zamówień Publicznych, 
+wobec którego wydano prawomocny wyrok sądu lub ostateczną decyzję administracyjną o 
+zaleganiu z uiszczeniem podatków, chyba że wykonawca odpowiednio przed upływem 
+terminu do składania wniosków o dopuszczenie do udziału w postępowaniu albo przed 
+upływem terminu składania ofert dokonał płatności należnych podatków, wraz z odsetkami lub 
+grzywnami lub zawarł wiążące porozumienie w sprawie spłaty tych należności. Zamawiający 
+przed wyborem najkorzystniejszej oferty wezwie Wykonawcę, którego oferta została najwyżej 
+oceniona, do złożenia w wyznaczonym terminie, nie krótszym niż 10 dni, aktualnych na dzień 
+złożenia: 1) Oświadczenia wykonawcy o aktualności informacji zawartych w oświadczeniu, o 
+którym mowa w art. 125 ust. 1 ustawy Pzp, w zakresie podstaw wykluczenia z postępowania 
+wskazanych przez zamawiającego, o których mowa w art. 108 ust. 1 pkt 3 Ustawy Prawo 
+Zamówień Publicznych.
+Naruszenie zobowiązania dotyczącego płatności składek na ubezpieczenia społeczne: 
+Wykonawca zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 pkt 3 Ustawy 
+Prawo Zamówień Publicznych, wobec którego wydano prawomocny wyrok sądu lub 
+ostateczną decyzję administracyjną o zaleganiu z uiszczeniem opłat lub składek na 
+ubezpieczenie społeczne lub zdrowotne, chyba że wykonawca odpowiednio przed upływem 
+terminu do składania wniosków o dopuszczenie do udziału w postępowaniu albo przed 
+upływem terminu składania ofert dokonał płatności należnych opłat lub składek na 
+ubezpieczenie społeczne lub zdrowotne wraz z odsetkami lub grzywnami lub zawarł wiążące 
+porozumienie w sprawie spłaty tych należności. Zamawiający przed wyborem 
+najkorzystniejszej oferty wezwie Wykonawcę, którego oferta została najwyżej oceniona, do 
+złożenia w wyznaczonym terminie, nie krótszym niż 10 dni, aktualnych na dzień złożenia: 1) 
+Oświadczenia wykonawcy o aktualności informacji zawartych w oświadczeniu, o którym mowa 
+w art. 125 ust. 1 ustawy Pzp, w zakresie podstaw wykluczenia z postępowania wskazanych 
+przez zamawiającego, o których mowa w art. 108 ust. 1 pkt 3 Ustawy Prawo Zamówień 
+Publicznych.
+Naruszenie obowiązków w dziedzinie prawa pracy: Wykonawca zostanie wykluczony z 
+postępowania na podstawie art. 108 ust. 1 pkt 1 lit. h Ustawy Prawo Zamówień Publicznych, 
+którego skazano prawomocnie za przestępstwo o którym mowa w art. 9 ust. 1 i 3 lub art. 10 
+ustawy z dnia 15 czerwca 2012 r. o skutkach powierzania wykonywania pracy cudzoziemcom 
+przebywającym wbrew przepisom na terytorium Rzeczypospolitej Polskiej lub odpowiedni czyn 
+zabroniony określony w przepisach prawa obcego. Wykonawca zostanie wykluczony z 
+postępowania na podstawie art. 108 ust. 1 pkt 2 Ustawy Prawo Zamówień Publicznych, jeżeli 
+urzędującego członka jego organu zarządzającego lub nadzorczego, wspólnika spółki w 
+spółce jawnej lub partnerskiej albo komplementariusza w spółce komandytowej lub 
+komandytowo-akcyjnej lub prokurenta prawomocnie skazano za przestępstwo wskazane w 
+art. 108 ust. 1 pkt 1 lit. h Ustawy Prawo Zamówień Publicznych. Zamawiający przed wyborem 
+najkorzystniejszej oferty wezwie Wykonawcę, którego oferta została najwyżej oceniona, do 
+złożenia w wyznaczonym terminie, nie krótszym niż 10 dni, aktualnych na dzień złożenia: 1) 
+Informacji z Krajowego Rejestru Karnego w zakresie art. 108 ust. 1 pkt 1 ustawy Pzp - 
+sporządzona nie wcześniej niż 6 miesięcy przed jej złożeniem; 2) Informacji z Krajowego 
+Rejestru Karnego w zakresie art. 108 ust. 1 pkt 2 ustawy Pzp - sporządzona nie wcześniej niż 
+6 miesięcy przed jej złożeniem.
+Porozumienia z innymi wykonawcami mające na celu zakłócenie konkurencji: Wykonawca 
+zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 pkt 5 Ustawy Prawo 
+Zamówień Publicznych, jeżeli zamawiający może stwierdzić, na podstawie wiarygodnych 
+przesłanek, że wykonawca zawarł z innymi wykonawcami porozumienie mające na celu 
+zakłócenie konkurencji, w szczególności jeżeli należąc do tej samej grupy kapitałowej w 
+364525-2025 Page 5/9
+rozumieniu ustawy z dnia 16 lutego 2007 r. o ochronie konkurencji i konsumentów, złożyli 
+odrębne oferty, oferty częściowe lub wnioski o dopuszczenie do udziału w postępowaniu, 
+chyba że wykażą, że przygotowali te oferty lub wnioski niezależnie od siebie Zamawiający 
+przed wyborem najkorzystniejszej oferty wezwie Wykonawcę, którego oferta została najwyżej 
+oceniona, do złożenia w wyznaczonym terminie, nie krótszym niż 10 dni, aktualnych na dzień 
+złożenia: 1) Oświadczenia wykonawcy, w zakresie art. 108 ust. 1 pkt 5 ustawy Pzp, o braku 
+przynależności do tej samej grupy kapitałowej w rozumieniu ustawy z dnia 16 lutego 2007 r. o 
+ochronie konkurencji i konsumentów (t.j. Dz. U. z 2024 r. poz. 594, ze zm.), z innym 
+wykonawcą, który złożył odrębną ofertę, ofertę częściową lub wniosek o dopuszczenie do 
+udziału w postępowaniu, albo oświadczenia o przynależności do tej samej grupy kapitałowej 
+wraz z dokumentami lub informacjami potwierdzającymi przygotowanie oferty, oferty 
+częściowej lub wniosku o dopuszczenie do udziału w postępowaniu niezależnie od innego 
+wykonawcy należącego do tej samej grupy kapitałowej. 2) Oświadczenia wykonawcy o 
+aktualności informacji zawartych w oświadczeniu, o którym mowa w art. 125 ust. 1 ustawy 
+Pzp, w zakresie podstaw wykluczenia z postępowania wskazanych przez zamawiającego, w 
+zakresie art. 108 ust. 1 pkt 5 ustawy Pzp, dotyczących zawarcia z innymi wykonawcami 
+porozumienia mającego na celu zakłócenie konkurencji.
+Bezpośrednie lub pośrednie zaangażowanie w przygotowanie przedmiotowego postępowania 
+o udzielenie zamówienia: Wykonawca zostanie wykluczony z postępowania na podstawie art. 
+108 ust. 1 pkt 6 Ustawy Prawo Zamówień Publicznych, jeżeli, w przypadkach, o których mowa 
+w art. 85 ust. 1, doszło do zakłócenia konkurencji wynikającego z wcześniejszego 
+zaangażowania tego wykonawcy lub podmiotu, który należy z wykonawcą do tej samej grupy 
+kapitałowej w rozumieniu ustawy z dnia 16 lutego 2007 r. o ochronie konkurencji i 
+konsumentów, chyba że spowodowane tym zakłócenie konkurencji może być wyeliminowane 
+w inny sposób niż przez wykluczenie wykonawcy z udziału w postępowaniu o udzielenie 
+zamówienia. Zamawiający przed wyborem najkorzystniejszej oferty wezwie Wykonawcę, 
+którego oferta została najwyżej oceniona, do złożenia w wyznaczonym terminie, nie krótszym 
+niż 10 dni, aktualnych na dzień złożenia: 1) Oświadczenia wykonawcy o aktualności informacji 
+zawartych w oświadczeniu, o którym mowa w art. 125 ust. 1 ustawy Pzp, w zakresie podstaw 
+wykluczenia z postępowania wskazanych przez zamawiającego, w zakresie art. 108 ust. 1 pkt 
+6 ustawy Pzp, dotyczących zawarcia z innymi wykonawcami porozumienia mającego na celu 
+zakłócenie konkurencji.
+Naruszenie zobowiązań wynikających wyłącznie z krajowych przesłanek wykluczenia: 
+Wykonawca zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 pkt 1 Ustawy 
+Prawo Zamówień Publicznych, którego skazano prawomocnie za przestępstwo: 1) o którym 
+mowa w art. 47 ustawy o sporcie lub odpowiedni czyn zabroniony określony w przepisach 
+prawa obcego, lub 2) przeciwko wiarygodności dokumentów i przestępstwa przeciwko 
+obrotowi gospodarczemu (art. 108 ust. 1 pkt 1 lit. g) i pkt 2 ustawy Pzp), tj. za przestępstwa, o 
+których mowa w art. 270- 277d Kodeksu karnego [przestępstwa wiarygodności dokumentów] i 
+przestępstwa, o których mowa w art. 296-307 Kodeksu karnego [przestępstwa przeciwko 
+obrotowi gospodarczemu] , z wyjątkiem przestępstwa udaremniania lub utrudniania 
+stwierdzenia przestępnego pochodzenia pieniędzy lub ukrywania ich pochodzenia, o którym 
+mowa w art. 299 Kodeksu karnego lub odpowiedni czyn zabroniony określony w przepisach 
+prawa obcego. Wykonawca zostanie wykluczony z postępowania na podstawie art. 108 ust. 1 
+pkt 2 Ustawy Prawo Zamówień Publicznych, jeżeli urzędującego członka jego organu 
+zarządzającego lub nadzorczego, wspólnika spółki w spółce jawnej lub partnerskiej albo 
+komplementariusza w spółce komandytowej lub komandytowo-akcyjnej lub prokurenta 
+prawomocnie skazano za przestępstwo wskazane w art. 108 ust. 1 pkt 1 Ustawy Prawo 
+Zamówień Publicznych. Wykonawca zostanie wykluczony z postępowania na podstawie art. 
+108 ust. 1 pkt 4 Ustawy Prawo Zamówień Publicznych, wobec którego prawomocnie 
+364525-2025 Page 6/9
+5.1.6.
+5.1.3.
+5.1.2.
+5.1.1.
+5.1.
+orzeczono zakaz ubiegania się o zamówienia publiczne; zakaz orzekany jest wobec podmiotu 
+zbiorowego w oparciu o przepisy ustawy z dnia 28 października 2002 r. o odpowiedzialności 
+podmiotów zbiorowych za czyny zabronione pod groźbą kary (Dz. U. z 2016 r. poz. 1541 oraz 
+z 2017 r. poz. 724 i 933 ), a wobec osoby fizycznej w oparciu o przepisy Kodeks u 
+postępowania karnego. Zamawiający przed wyborem najkorzystniejszej oferty wezwie 
+Wykonawcę, którego oferta została najwyżej oceniona, do złożenia w wyznaczonym terminie, 
+nie krótszym niż 10 dni, aktualnych na dzień złożenia: 1) Informacji z Krajowego Rejestru 
+Karnego w zakresie art. 108 ust. 1 pkt 1 ustawy Pzp - sporządzona nie wcześniej niż 6 
+miesięcy przed jej złożeniem; 2) Informacji z Krajowego Rejestru Karnego w zakresie art. 108 
+ust. 1 pkt 1 ustawy Pzp - sporządzona nie wcześniej niż 6 miesięcy przed jej złożeniem; 3) 
+Informacji z Krajowego Rejestru Karnego w zakresie art. 108 ust. 1 pkt 4 ustawy Pzp - 
+sporządzona nie wcześniej niż 6 miesięcy przed jej złożeniem; 4) Oświadczenia wykonawcy o 
+aktualności informacji zawartych w oświadczeniu, o którym mowa w art. 125 ust. 1 ustawy 
+Pzp, w zakresie podstaw wykluczenia z postępowania wskazanych przez zamawiającego, o 
+których mowa w art. 108 ust. 1 pkt 4 ustawy Pzp, dotyczących orzeczenia zakazu ubiegania 
+się o zamówienie publiczne tytułem środka zapobiegawczego.
+5. Część zamówienia
+Część zamówienia: LOT-0001
+Tytuł: Dostawa, wdrożenie, skonfigurowanie serwerowego środowiska teleinformatycznego 
+wraz z serwisem i gwarancją
+Opis: Przedmiotem zamówienia jest przygotowanie środowiska teleinformatycznego, na 
+potrzeby realizacji zadań instytutu, zbudowanego w oparciu o dostarczone urządzenia 
+sprzętowe i oprogramowanie
+Wewnętrzny identyfikator: Dostawa, wdrożenie, skonfigurowanie serwerowego środowiska 
+teleinformatycznego wraz z serwisem i gwarancją
+Przeznaczenie
+Charakter zamówienia: Dostawy
+Dodatkowy charakter zamówienia: Usługi
+Główna klasyfikacja (cpv): 48820000 Serwery
+Dodatkowa klasyfikacja (cpv): 48732000 Pakiety oprogramowania do zabezpieczania danych
+Opcje: 
+Opis opcji: Zamawiający zastrzega sobie prawo realizacji usługi gwarancji na wdrożone 
+środowisko oraz gwarancji producenta lub oficjalnych partnerów producenta na dostarczony 
+sprzęt oraz zapewnienia w okresie gwarancji bezpłatnego wsparcia technicznego i serwisu 
+gwarancyjnego z prawem opcji w zakresie przedłużenia terminu realizacji Umowy o kolejne 48 
+miesięcy w zależności od decyzji Zamawiającego.
+Miejsce realizacji
+Miejscowość: Warszawa
+Podpodział krajowy (NUTS): Miasto Warszawa (PL911)
+Kraj: Polska
+Szacowany okres obowiązywania
+Okres obowiązywania: 39 Miesiące
+Informacje ogólne
+Zastrzeżony udział: Udział nie jest zastrzeżony.
+Projekt zamówienia niefinansowany z funduszy UE
+364525-2025 Page 7/9
+5.1.15.
+5.1.12.
+5.1.11.
+5.1.10.
+5.1.9.
+Zamówienie jest objęte zakresem Porozumienia w sprawie zamówień rządowych (GPA): nie
+Informacje dodatkowe: Zamówienie współfinansowane jest z Wieloletniego Programu 
+Inwestycyjnego - umowa ramowa DOI/PW/IKARD/85112/6230/101/105 na udzielenie dotacji 
+celowej na dofinansowanie realizacji programu wieloletniego pn. „Wieloletni Plan Inwestycyjny 
+– budowa, przebudowa, modernizacja infrastruktury Narodowego Instytutu Kardiologii Stefana 
+kardynała Wyszyńskiego Państwowego Instytutu Badawczego w celu zwiększenia 
+dostępności i jakości wysokospecjalistycznych świadczeń zdrowotnych dla pacjentów z 
+chorobami układu sercowo-naczyniowego. Zamawiający przewiduje możliwość unieważnienia 
+przedmiotowego postępowania z powodu braku środków, jeżeli środki publiczne, które 
+Zamawiający zamierzał przeznaczyć na sfinansowanie całości lub części zamówienia, nie 
+zostały mu przyznane. Powyższa możliwość unieważnienia postępowania została 
+przewidziana, zgodnie z art. 257 ustawy Pzp, w ogłoszeniu o zamówieniu.
+Kryteria kwalifikacji
+Źródła kryteriów wyboru: Dokumenty zamówienia
+Kryteria udzielenia zamówienia
+: Kryterium
+: Rodzaj Cena
+Opis: Cena
+: Kategoria kryterium udzielenia zamówienia waga Waga (wartość punktowa, dokładna)
+Kryterium udzielenia - Liczba: 100,00
+Dokumenty zamówienia
+Adres dokumentów zamówienia: https://ikard.ezamawiajacy.pl/pn/ikard/demand/214603/notice
+/public/details
+Warunki udzielenia zamówienia
+Warunki zgłoszenia: 
+Zgłoszenie elektroniczne: Wymagane
+Adres na potrzeby zgłoszenia: https://ikard.ezamawiajacy.pl/pn/ikard/demand/214603/notice
+/public/details
+Języki, w których można składać oferty lub wnioski o dopuszczenie do udziału: polski
+Katalog elektroniczny: Niedozwolone
+Wymagane jest użycie zaawansowanego lub kwalifikowanego podpisu elektronicznego lub 
+pieczęci elektronicznej (zgodnie z definicją w rozporządzeniu (UE) nr 910/2014)
+Oferty wariantowe: Niedozwolone
+Termin składania ofert: 09/07/2025 12:00:00 (UTC+2) czas wschodnioeuropejski, czas 
+środkowoeuropejski letni
+Termin, do którego oferta musi pozostać ważna: 90 Dni
+Informacje na temat publicznego otwarcia: 
+Data otwarcia: 09/07/2025 13:00:00 (UTC+2) czas wschodnioeuropejski, czas 
+środkowoeuropejski letni
+Warunki zamówienia: 
+Wykonanie zamówienia musi odbywać się w ramach programów zatrudnienia chronionego: Nie
+Fakturowanie elektroniczne: Dozwolone
+Stosowane będą zlecenia elektroniczne: tak
+Stosowane będą płatności elektroniczne: tak
+Techniki
+Umowa ramowa: 
+364525-2025 Page 8/9
+8.1.
+5.1.16.
+Brak umowy ramowej
+Informacje o dynamicznym systemie zakupów: 
+Brak dynamicznego systemu zakupów
+Aukcja elektroniczna: nie
+Dalsze informacje, mediacja i odwołanie
+Organ odwoławczy: Krajowa Izba Odwoławcza
+Informacje o terminach odwołania: 1. Każdemu Wykonawcy, a także innemu podmiotowi, 
+jeżeli ma lub miał interes w uzyskaniu danego zamówienia oraz poniósł lub może ponieść 
+szkodę w wyniku naruszenia przez Zamawiającego przepisów ustawy Pzp przysługują środki 
+ochrony prawnej przewidziane w dziale IX niniejszej ustawy. 2. Środki ochrony prawnej wnosi 
+się na zasadach określonych w art. 513-516 ustawy Pzp. 3. Termin wniesienia odwołania 
+określa art. 515 ustawy Prawo zamówień publicznych. 4. Środki ochrony prawnej wobec 
+ogłoszenia o zamówieniu oraz dokumentów zamówienia przysługują również organizacjom 
+wpisanym na listę, o której mowa w art. 469 pkt. 15 ustawy Pzp, oraz Rzecznikowi Małych i 
+Średnich Przedsiębiorców.
+Organizacja udzielająca dodatkowych informacji na temat postępowania o udzielenie 
+zamówienia: Narodowy Instytut Kardiologii Stefana Kardynała Wyszyńskiego - Państwowy 
+Instytut Badawczy
+Organizacja zapewniająca dostęp offline do dokumentów zamówienia: Narodowy Instytut 
+Kardiologii Stefana Kardynała Wyszyńskiego - Państwowy Instytut Badawczy
+Organizacja przyjmująca wnioski o dopuszczenie do udziału: Narodowy Instytut Kardiologii 
+Stefana Kardynała Wyszyńskiego - Państwowy Instytut Badawczy
+Organizacja rozpatrująca oferty: Narodowy Instytut Kardiologii Stefana Kardynała 
+Wyszyńskiego - Państwowy Instytut Badawczy
+8. Organizacje
+ORG-0001
+Oficjalna nazwa: Narodowy Instytut Kardiologii Stefana Kardynała Wyszyńskiego - Państwowy 
+Instytut Badawczy
+Numer rejestracyjny: 5250008525
+Departament: Dział Zamówień Publicznych
+Adres pocztowy: ul. Alpejska 42
+Miejscowość: Warszawa
+Kod pocztowy: 04-628
+Podpodział krajowy (NUTS): Miasto Warszawa (PL911)
+Kraj: Polska
+Punkt kontaktowy: Dział Zamówień Publicznych
+E-mail: zamowieniapubliczne@ikard.pl
+Telefon: +48 228124570
+Adres strony internetowej: https://ikard.ezamawiajacy.pl
+Adres na potrzeby wymiany informacji (URL): https://ikard.ezamawiajacy.pl
+Profil nabywcy: https://ikard.pl
+Role tej organizacji: 
+Nabywca
+Organizacja udzielająca dodatkowych informacji na temat postępowania o udzielenie 
+zamówienia
+Organizacja zapewniająca dostęp offline do dokumentów zamówienia
+364525-2025 Page 9/9
+8.1.
+8.1.
+Organizacja przyjmująca wnioski o dopuszczenie do udziału
+Organizacja rozpatrująca oferty
+ORG-0002
+Oficjalna nazwa: Krajowa Izba Odwoławcza
+Numer rejestracyjny: 5262239325
+Departament: Departament Odwołań
+Adres pocztowy: Postępu 17a
+Miejscowość: Warszawa
+Kod pocztowy: 02-676
+Podpodział krajowy (NUTS): Miasto Warszawa (PL911)
+Kraj: Polska
+E-mail: odwolania@uzp.gov.pl
+Telefon: (22) 458 78 01
+Faks: (22) 458 78 00
+Adres strony internetowej: www.uzp.gov.pl
+Role tej organizacji: 
+Organ odwoławczy
+ORG-0000
+Oficjalna nazwa: Publications Office of the European Union
+Numer rejestracyjny: PUBL
+Miejscowość: Luxembourg
+Kod pocztowy: 2417
+Podpodział krajowy (NUTS): Luxembourg (LU000)
+Kraj: Luksemburg
+E-mail: ted@publications.europa.eu
+Telefon: +352 29291
+Adres strony internetowej: https://op.europa.eu
+Role tej organizacji: 
+TED eSender
+Informacje o ogłoszeniu
+Identyfikator/wersja ogłoszenia: ed107f36-c00c-423d-9817-7229a56efd63  -  01
+Typ formularza: Procedura konkurencyjna
+Rodzaj ogłoszenia: Ogłoszenie o zamówieniu lub ogłoszenie o koncesji – tryb standardowy
+Podrodzaj ogłoszenia: 16
+Ogłoszenie – data wysłania: 03/06/2025 14:37:03 (UTC)
+Języki, w których przedmiotowe ogłoszenie jest oficjalnie dostępne: polski
+Numer publikacji ogłoszenia: 364525-2025
+Numer wydania Dz.U. S: 107/2025
+Data publikacji: 05/06/2025

@@ -1,0 +1,11 @@
+# Dodatek dla serwera z GPU NVIDIA (wymaga NVIDIA Container Toolkit).
+# docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d llm
+services:
+  llm:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

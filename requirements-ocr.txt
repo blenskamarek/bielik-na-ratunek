@@ -1,0 +1,8 @@
+# Opcjonalny zapasowy OCR instalowany przez pip (gdy brak Tesseracta).
+# Uwaga: domyslny model nie zna polskich znakow diakrytycznych.
+# Instalacja: pip install -r requirements.txt -r requirements-ocr.txt
+rapidocr-onnxruntime==1.2.3
+onnxruntime==1.32.0
+opencv-python==5.1.0.95
+numpy==2.5.5
+shapely==2.2.0

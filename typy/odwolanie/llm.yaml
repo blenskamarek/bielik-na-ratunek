@@ -1,0 +1,66 @@
+# Pola odwołania, które model może uzupełnić, gdy reguły ich nie znalazły.
+# Opisy pól na podstawie specyfikacji organizatora (oczekiwane-json/odwolanie.json).
+# typ: tekst | data | cyfry | email | kwota | wybor | lista  (decyduje o sposobie weryfikacji)
+
+opis_dokumentu: Odwołanie wykonawcy do Prezesa Krajowej Izby Odwoławczej (KIO) w postępowaniu o udzielenie zamówienia publicznego.
+
+# Które fragmenty tekstu dostaje model: początek (strony) i okno od tytułu ODWOŁANIE (czynność, zarzuty).
+fragmenty:
+  - {od: '\A', znakow: 3500}
+  - {od: 'O\s?D\s?W\s?O\s?Ł\s?A\s?N\s?I\s?E', znakow: 2500}
+
+# Data i miejscowość nagłówka celowo NIE są tu wymienione: reguła (linia "Miasto, dnia ...")
+# jest bezbłędna także na skanie, a model przy braku nagłówka wstawiał datę czynności
+# (pomiar na zestawach 51-60: 3 fałszywe wartości na 10 dokumentów).
+pola:
+  OdwolanieKIO.czynnosc_dzien:
+    typ: data
+    opis: Data czynności Zamawiającego zaskarżonej pierwszym zarzutem (np. dzień publikacji ogłoszenia i SWZ, odrzucenia oferty, wyboru oferty).
+  OdwolanieKIO.czynnosc_powod_id:
+    typ: wybor
+    opis: Rodzaj czynności Zamawiającego zaskarżonej pierwszym zarzutem — podaj numer.
+    opis_do: OdwolanieKIO.czynnosc_opis     # program wpisze kanoniczny opis dla wybranego numeru
+    wartosci:
+      1: Decyzja o odrzuceniu oferty
+      2: Ogłoszenie wyboru oferty
+      3: Decyzja o wykluczeniu wykonawcy
+      4: Publikacja specyfikacji warunków zamówienia (SWZ)
+      5: Modyfikacja treści SWZ
+      6: Odpowiedzi/wyjaśnienia do SWZ
+      7: Zaniechanie odrzucenia oferty
+      8: Zaniechanie wykluczenia wykonawcy
+      9: Decyzja o unieważnieniu postępowania
+      10: Zaniechanie unieważnienia postępowania
+      11: Opis przedmiotu zamówienia (OPZ)
+      12: Projektowane postanowienia umowy
+  ZamowieniePubliczne.numer_postepowania:
+    typ: tekst
+    opis: Numer referencyjny / znak sprawy / numer postępowania, np. 'ZP.039.2025', 'RZP.27.29.2025.KD'. Nie numer BZP ani TED.
+  ZamowieniePubliczne.tytul:
+    typ: tekst
+    opis: Tytuł (nazwa) zamówienia, zwykle w cudzysłowie po 'pn.'. Bez cudzysłowów.
+
+  Odwolujacy:
+    typ: lista
+    max: 1
+    opis: Wykonawca wnoszący odwołanie (przy konsorcjum tylko lider).
+    element:
+      nazwa: {typ: tekst, opis: Pełna nazwa odwołującego.}
+      krs: {typ: cyfry, dlugosc: 10, opis: KRS odwołującego.}
+      nip: {typ: cyfry, dlugosc: 10, opis: NIP odwołującego.}
+      regon: {typ: cyfry, opis: REGON odwołującego.}
+      przez-pelnomocnika: {typ: wybor, wartosci: [0, 1], opis: 1 jeśli odwołujący działa przez pełnomocnika, inaczej 0.}
+      pelnomocnik.imie_nazwisko: {typ: osoba, opis: Imię i nazwisko pierwszego pełnomocnika (bez tytułu adw./r. pr.).}
+      pelnomocnik.nazwa: {typ: tekst, opis: Nazwa kancelarii zatrudniającej pełnomocnika.}
+      pelnomocnik.mail: {typ: email, opis: Adres e-mail pełnomocnika.}
+
+  Zamawiajacy:
+    typ: lista
+    max: 5
+    opis: Zamawiający (jeden lub kilku).
+    element:
+      nazwa: {typ: tekst, opis: Pełna nazwa zamawiającego.}
+      krs: {typ: cyfry, dlugosc: 10, opis: KRS, jeśli podany przy zamawiającym.}
+      nip: {typ: cyfry, dlugosc: 10, opis: NIP, jeśli podany przy zamawiającym.}
+      regon: {typ: cyfry, opis: REGON, jeśli podany przy zamawiającym.}
+      prowadzacy_postepowanie: {typ: wybor, wartosci: [0, 1], tylko_gdy_wiele: true, opis: Tylko przy kilku zamawiających — 1 dla prowadzącego postępowanie, 0 dla pozostałych; przy jednym null.}

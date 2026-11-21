@@ -1,0 +1,59 @@
+# ODWOŁANIA2JSON - wdrożenie na serwerze (aplikacja + lokalny model językowy).
+# UWAGA: nieprzetestowane (brak Dockera na komputerze deweloperskim). Sprawdzić przed wdrożeniem.
+#
+# Uruchomienie (z katalogu deploy/):
+#   docker compose up -d llm && docker compose run --rm llm-init     # raz: pobranie i przygotowanie modelu
+#   docker compose run --rm app                                       # przetwarza ../input -> ../output
+# Z GPU NVIDIA dodatkowo: -f docker-compose.yml -f docker-compose.gpu.yml
+
+services:
+  llm:
+    image: ollama/ollama:0.40.17          # ta sama wersja co w testach; zweryfikować dostępność tagu
+    restart: unless-stopped
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1               # model stale w pamięci
+      - OLLAMA_NUM_PARALLEL=1
+    volumes:
+      - modele:/root/.ollama
+    # brak "ports": model dostępny wyłącznie w sieci wewnętrznej compose (nie z zewnątrz)
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  llm-init:                                # jednorazowo: pobranie Bielika i wariantu z kontekstem 6144
+    image: ollama/ollama:0.40.17
+    depends_on:
+      llm:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=llm:11434
+    volumes:
+      - ../narzedzia/modelfile:/modelfile:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        ollama pull SpeakLeash/bielik-11b-v3.1-instruct:Q4_K_M &&
+        ollama create bielik-11b-6k -f /modelfile/bielik-11b-6k.Modelfile
+    restart: "no"
+
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    depends_on:
+      llm:
+        condition: service_healthy
+    environment:
+      - LLM_ADRES=http://llm:11434/v1
+      - LLM_MODEL=bielik-11b-6k
+    volumes:
+      - ../input:/dane/input:ro
+      - ../output:/dane/output
+      - ../raport:/dane/raport
+      - ../typy:/app/typy:ro               # konfiguracja typów dokumentów bez przebudowy obrazu
+    restart: "no"
+
+volumes:
+  modele:

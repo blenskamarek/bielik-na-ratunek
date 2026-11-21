@@ -1,0 +1,60 @@
+# Typ dokumentu: ogłoszenie o zamówieniu publikowane w TED (Dz.U. S).
+# POKAZ dodania typu bez zmian w kodzie. Katalog zaczyna się od "_", więc typ jest NIEAKTYWNY
+# (nie wpływa na ocenę konkursową). Aktywacja: zmiana nazwy katalogu na "ogloszenie_ted".
+# Sprawdzenie: python narzedzia/nowy_typ.py sprawdz typy/_pokaz_ogloszenie_ted
+
+klasyfikacja:
+  slowa_kluczowe: [oficjalna nazwa, identyfikator procedury, numer publikacji ogłoszenia, główna klasyfikacja (cpv), nabywca]
+  wymagane_na_poczatku: [see the notice on ted website, ogłoszenie o zamówieniu]
+  okno_poczatku: 2000
+  ogranicz_do_znakow: 100000
+
+# Reguły dla pól o stałej etykiecie (szybkie, deterministyczne, bez modelu). Pole, którego reguła
+# nie znajdzie, uzupełnia model z sekcji llm (jeśli jest tam opisane).
+pola:
+  ogloszenie.numer_publikacji:
+    regex: 'Numer publikacji ogłoszenia:\s*(\d{6}-\d{4})'
+  ogloszenie.numer_wydania:
+    regex: 'Numer wydania Dz\.U\. S:\s*(\d+/\d{4})'
+  ogloszenie.data_publikacji:
+    regex: 'Data publikacji:\s*({DATA})'
+    typ: data
+  ogloszenie.identyfikator_wewnetrzny:
+    regex: 'Wewnętrzny identyfikator:\s*(\S+)'
+  ogloszenie.rodzaj_procedury:
+    regex: 'Rodzaj procedury:\s*(.+)'
+  ogloszenie.tytul:                       # tytuł wielowierszowy: do etykiety "Opis:"
+    regex: '^Tytuł:\s*(.+?)\s*\n\s*Opis:'
+    flagi: [dotall]
+  ogloszenie.cpv_glowny:
+    regex: 'Główna klasyfikacja \(cpv\):\s*(\d{8})'
+  ogloszenie.termin_skladania_ofert:
+    regex: 'Termin składania ofert:\s*({DATA})'
+    typ: data
+  nabywca.nazwa:                          # pierwsza "Oficjalna nazwa" = nabywca; do linii "E-mail:"
+    regex: 'Oficjalna nazwa:\s*(.+?)\s*\n\s*E-mail:'
+    flagi: [dotall]
+  nabywca.numer_rejestracyjny:
+    regex: 'Numer rejestracyjny:\s*(\d{10})'
+  nabywca.email:
+    regex: 'Nabywca[\s\S]*?E-mail:\s*([\w.+-]+@[\w-]+(?:\.[\w-]+)+)'
+
+llm:
+  opis_dokumentu: Ogłoszenie o zamówieniu publicznym opublikowane w Dzienniku Urzędowym UE (TED), standardowy formularz eForms.
+  fragmenty:
+    - {od: '\A', znakow: 3500}
+    - {od: 'Termin składania ofert', znakow: 300}
+    - {od: 'Numer publikacji ogłoszenia', znakow: 300}
+    - {od: 'Numer rejestracyjny', znakow: 300}     # sekcja "Organizacje" na końcu dokumentu
+  pola:
+    ogloszenie.numer_publikacji: {typ: tekst, opis: "Numer publikacji ogłoszenia w TED w formacie NNNNNN-RRRR (np. z linii 'Numer publikacji ogłoszenia:')."}
+    ogloszenie.numer_wydania: {typ: tekst, opis: "Numer wydania Dz.U. S, np. '107/2025'."}
+    ogloszenie.data_publikacji: {typ: data, opis: "Data publikacji ogłoszenia (linia 'Data publikacji:')."}
+    ogloszenie.identyfikator_wewnetrzny: {typ: tekst, opis: "Wewnętrzny identyfikator / numer referencyjny postępowania zamawiającego, np. 'ZP.039.2025'."}
+    ogloszenie.rodzaj_procedury: {typ: tekst, opis: "Rodzaj procedury, np. 'Otwarta', 'Ograniczona'."}
+    ogloszenie.tytul: {typ: tekst, opis: "Tytuł zamówienia z sekcji Procedura (linia 'Tytuł:')."}
+    ogloszenie.cpv_glowny: {typ: cyfry, dlugosc: 8, opis: "Główny kod CPV (8 cyfr) z linii 'Główna klasyfikacja (cpv)'."}
+    ogloszenie.termin_skladania_ofert: {typ: data, opis: "Data z linii 'Termin składania ofert' (bez godziny)."}
+    nabywca.nazwa: {typ: tekst, opis: "Oficjalna nazwa nabywcy (zamawiającego) z sekcji 'Nabywca' - pierwsza 'Oficjalna nazwa' w dokumencie."}
+    nabywca.numer_rejestracyjny: {typ: cyfry, dlugosc: 10, opis: "Numer rejestracyjny (NIP) nabywcy - pierwszy 'Numer rejestracyjny' w dokumencie."}
+    nabywca.email: {typ: email, opis: "Adres e-mail nabywcy z sekcji 'Nabywca' (pierwszy e-mail w dokumencie)."}

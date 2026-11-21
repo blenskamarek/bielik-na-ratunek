@@ -1,0 +1,75 @@
+# Pełnomocnictwo procesowe - typ opisany wyłącznie konfiguracją (bez kodu).
+# Struktura wyniku wg specyfikacji organizatora (oczekiwane-json/pelnomocnictwo.json).
+
+klasyfikacja:
+  slowa_kluczowe: [pełnomocnictw, mocodawc, ustanawiam, udzielam, upoważniam, umocowan, pełnomocnik]
+  wymagane_na_poczatku: [pełnomocnictw]
+  okno_poczatku: 2000
+  ogranicz_do_znakow: 100000
+
+sekcje:
+  # blok podpisów: od pierwszej linii kropek albo nagłówka "W imieniu X:" / "Za X" do "Pełnomocnictwo przyjmuję"
+  podpisy:
+    regex: '^(?:[ \t]*\.{5,}[ \t]*$|[ \t]*(?-i:W imieniu|Za)\s[^\n]*(?:sp\.|S\.\s?A\.|:)[ \t]*$)[\s\S]*?(?=^[^\n]*przyjmuj|\Z)'
+    grupa: 0
+  # lista pełnomocników: od "udziela pełnomocnictwa:" do "do reprezentowania ..."
+  lista_pelnomocnikow:
+    regex: 'udziela\w*\s+pełnomocnictw\w*:?[ \t]*\n?([\s\S]*?)(?=\bdo\s+(?:reprezentowania|reprezentacji|działania|występowania)|\Z)'
+
+listy:
+  mocodawca:
+    szukaj_w: plaski
+    # zamawiający nie jest mocodawcą: wymazujemy "prowadzonym przez <zamawiający>" i "Zamawiający <nazwa firmy>"
+    pomin:
+      - 'prowadzon\w+ przez .*?(?=,\s+(?:a\s+)?w\s+(?:tym|szczególności)|,\s+do\s|\.\s+(?-i:[A-ZĄĆĘŁŃÓŚŹŻ])|$)'
+      - '(?-i:Zamawiając(?:y|ego|ym))\s+(?:(?-i:[A-ZĄĆĘŁŃÓŚŹŻ])[^\W\d_]+(?:-[^\W\d_]+)*\s+){1,6}(?:sp\.\s?z\s?o\.\s?o\.(?:\s+sp\.\s?[kjp]\.)?|S\.\s?A\.(?:\s+sp\.\s?k\.)?|sp\.\s?[kjp]\.|S\.\s?K\.\s?A\.)'
+    regex:
+      # 1) osoba fizyczna prowadząca działalność (jeśli występuje - tylko ona)
+      - '(?-i:Ja, niżej podpisany)\s+(?P<imie>[^\W\d_]+(?: [^\W\d_]+)+),\s+prowadzący działalność gospodarczą pod firmą\s+(?P<nazwa>.+?),\s+(?:ul\.|al\.|pl\.|NIP)'
+      # 2) "<nazwa> z siedzibą w ..." zaraz po tytule pisma albo po numerze członka konsorcjum
+      #    (dowolna forma prawna, także pełnymi słowami: "spółka akcyjna"); (\s+\S)? = pojedynczy śmieć OCR
+      - '(?:(?-i:PEŁNOMOCNICTWO|Pełnomocnictwo)(?:\s+PROCESOWE)?|\d\))(?:\s+\S)?\s+(?P<nazwa>(?-i:[A-ZĄĆĘŁŃÓŚŹŻ])[^:;()„”]{2,150}?),?\s+z\s+siedzibą'
+      # 3) firmy: 1-6 słów z wielkiej litery + forma prawna (bez słów-etykiet typu "Mocodawca", "PEŁNOMOCNICTWO")
+      - '(?<![\w.])(?<!przez )(?P<nazwa>(?-i:(?:(?!(?:Mocodawca|MOCODAWCA|Mocodawcą|Za|Wykonawca|Konsorcjum|Pełnomocnictwo|PEŁNOMOCNICTWO|PROCESOWE|Ja|Pełnomocnik|PEŁNOMOCNIK|Zamawiający)\b)[A-ZĄĆĘŁŃÓŚŹŻ][^\W\d_]+(?:-[^\W\d_]+)* ){1,6}(?:sp\.\s?z\s?o\.\s?o\.(?:\s+sp\.\s?[kjp]\.)?|S\.\s?A\.(?:\s+sp\.\s?k\.)?|sp\.\s?[kjp]\.|S\.\s?K\.\s?A\.)))'
+    unikalne_po: [data.nazwa]
+    pola:
+      data.imie_nazwisko: {z_grupy: imie}
+      # KRS / NIP z bloku tej firmy: od jej nazwy do nazwy następnej (osoba fizyczna nie ma KRS)
+      data.krs: {w: segment, regex: '\A(?!Ja, niżej podpisany)[\s\S]*?KRS[:\s]*((?:\d[ -]?){9}\d)\b', typ: cyfry}
+      data.nazwa:
+        z_grupy: nazwa
+        zamien: [['(?:\s+[^\w\s]+)+$', '']]
+      data.nip: {w: segment, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)\b', typ: cyfry}
+      data.typ: {w: dopasowanie, mapa: [[osoba_fizyczna, 'prowadzący działalność gospodarczą']], domyslnie: osoba_prawna}
+      podpisujacy:
+        lista:
+          regex:
+            # "reprezentowana przez: Imię Nazwisko — Prezes Zarządu, ..." w bloku tego mocodawcy
+            - regex: '(?P<imie>(?-i:[A-ZĄĆĘŁŃÓŚŹŻ][^\W\d_]+)(?:\s+\.)?\s+(?-i:[A-ZĄĆĘŁŃÓŚŹŻ][^\W\d_]+(?:-[A-ZĄĆĘŁŃÓŚŹŻ][^\W\d_]+)?))\s*(?:[-—–]+|,)\s*(?:wice)?(?:prezes|członek|prokurent|wspólnik|dyrektor|likwidator|komplementariusz|właściciel)'
+              w: segment
+            # linie "Imię Nazwisko" w bloku podpisów; przy kilku mocodawcach - pod nagłówkiem z ich nazwą
+            - regex: '^[ \t]*(?!.*(?:prezes|prokurent|dyrektor|członek|wspólnik|zarząd|właściciel|likwidator|komplementariusz|kierownik|pełnomocnik))(?P<imie>(?-i:[A-ZĄĆĘŁŃÓŚŹŻ][^\W\d_]*(?:-[^\W\d_]+)*(?: +[A-ZĄĆĘŁŃÓŚŹŻ][^\W\d_]*(?:-[^\W\d_]+)*){1,3}))[ \t]*$'
+              w: podpisy
+              od: '^[ \t]*(?-i:W imieniu|Za)\s+{data_nazwa}'
+              do: '^[ \t]*(?-i:W imieniu|Za)\s+(?!{data_nazwa})'
+          unikalne_po: [imie_nazwisko]
+          pola:
+            imie_nazwisko: {z_grupy: imie, zamien: [['\s+\.(?=\s)', '']]}   # OCR: "Łukasz . Sosnowski"
+
+  pelnomocnicy:
+    szukaj_w: plaski
+    regex:
+      # 1) osoby z tytułem adw. / r. pr. przed nazwiskiem (PESEL, jeśli podany zaraz po nazwisku)
+      - '(?-i:\b(?:adw|r\. ?pr)\.)\s+(?P<imie>(?-i:[A-ZĄĆĘŁŃÓŚŹŻ][^\W\d_]*(?:-[^\W\d_]+)* [A-ZĄĆĘŁŃÓŚŹŻ][^\W\d_]*(?:-[^\W\d_]+)*))(?:[ ,(]*PESEL[: ]*(?P<pesel>\d{11})\b)?'
+      # 2) lista po "udziela pełnomocnictwa:" - same imiona i nazwiska w osobnych liniach
+      - regex: '^[^\w\n]{0,3}(?P<imie>[^\W\d_]+(?:-[^\W\d_]+)* [^\W\d_]+(?:-[^\W\d_]+)*)[ \t]*$'
+        w: lista_pelnomocnikow
+        szukaj_w: surowy
+      # 3) lista: "1. Imię Nazwisko — adwokat, ..., PESEL: ..." albo "Imię Nazwisko (radca prawny, ...) oraz ..."
+      - regex: '(?:^[^\w\n]{0,3}(?:\d[.)]\s*)?|\boraz\s+)(?P<imie>(?-i:[A-ZĄĆĘŁŃÓŚŹŻ])[^\W\d_]+ (?-i:[A-ZĄĆĘŁŃÓŚŹŻ])[^\W\d_]+(?:-[^\W\d_]+)?)(?=\s*(?:[—–-]|\(|,|$))(?:(?:(?!\boraz\b)[^\n]){0,90}?PESEL:?\s*(?P<pesel>\d{11}))?'
+        w: lista_pelnomocnikow
+        szukaj_w: surowy
+    unikalne_po: [imie_nazwisko]
+    pola:
+      imie_nazwisko: imie
+      pesel: pesel

@@ -1,0 +1,54 @@
+# Potwierdzenie przelewu bankowego — typ zdefiniowany wyłącznie konfiguracją (bez kodu).
+# Opis składni: docs/NOWY_TYP.md (wzory: typy/_szablon/typ.yaml)
+
+klasyfikacja:
+  slowa_kluczowe: [przelew, rachunek, kwota, data transakcji, potwierdz, bank]
+  # warunek konieczny: jeden z tych zwrotów w pierwszych 2000 znakach (bez spacji)
+  wymagane_na_poczatku: [przelew, potwierdzenie operacji, potwierdzenie transakcji]
+  okno_poczatku: 2000
+  ogranicz_do_znakow: 100000
+
+pola:
+  # Rachunki: pierwszy numer NRB po słowie wskazującym rolę (nadawca / odbiorca).
+  przelew_bankowy.z_rachunku:
+    regex: '(?:płatnik|nadawc|zleceniodawc|z rachunku|obciąż)[\s\S]{0,400}?({RACHUNEK})'
+    typ: rachunek
+
+  przelew_bankowy.na_rachunek:
+    regex:
+      # układ kolumnowy: najpierw etykiety "nadawcy ... odbiorcy", potem oba numery - odbiorca to drugi
+      - 'nadawc[\s\S]{0,60}?odbiorc[\s\S]{0,400}?{RACHUNEK}[\s\S]{0,300}?({RACHUNEK})'
+      - '(?:beneficjent|odbiorc|adresat|kontrahent|na rachunek|uznawan)[\s\S]{0,400}?({RACHUNEK})'
+    typ: rachunek
+
+  przelew_bankowy.kwota:
+    regex:
+      - '(?:kwot\w*|kwocie|wartość)[^\d\n]{0,60}\n?\s*(?:PLN|zł)?\s*({KWOTA})\b'
+      # kwota z walutą w innym miejscu niż etykieta (np. "-17,00 PLN" w kolumnie wyciągu)
+      - '(?<![\d,.])-?\s?({KWOTA})\s*(?:PLN|zł)\b'
+    typ: kwota
+
+  # Data operacji z etykiety; daty "wygenerowano/wydrukowano" są pomijane.
+  przelew_bankowy.data_operacji:
+    regex:
+      - '(?:data\s+(?:operacji|transakcji|wykonania|realizacji|przelewu)|w dniu)\s*[.:]*\s*({DATA})'
+      - '^(?!.*(?:wygenerowan|wydrukowan|sporządzon)).*?({DATA})'
+    typ: data
+
+  # numer transakcji: po etykiecie, wartość musi zawierać cyfrę (inaczej to kolejne słowo etykiety)
+  przelew_bankowy.numer_transakcji:
+    regex:
+      - '(?:numer\s+referencyjny(?:\s+transakcji)?|numer\s+transakcji|nr\s+(?:ref\.?|transakcji)|identyfikator)(?:\s+operacji)?\s*[.:]*\s*(?-i:((?=[A-Z0-9/\-]*\d)[A-Z0-9][A-Z0-9/\-]{5,}))'
+      - '(?-i:\b(CEN\d{6,}))'
+    flagi: []
+
+  # Tytuł: w cudzysłowie (układ prozą) albo wielowierszowy do następnej etykiety;
+  # etykiety "Tytuł..." mają pierwszeństwo przed "Opis" / "Szczegóły płatności" (bywa nagłówkiem kolumny).
+  przelew_bankowy.tytul:
+    regex:
+      - 'tytuł przelewu\s*:?\s*„([^”]+)”'
+      - '\b(?:tytuł przelewu|tytułem|tytuł)\b\s*:?[^\w\n]*\n?\s*(\w.*?)(?=\n\s*(?:identyfikator|zrealizowano|typ operacji|kanał|numer|nr\b|status|waluta|opłata|prowizja|tryb|z poważaniem|bank nie|w razie|potwierdzenie ma|dział|data|kwota|wartość|godz|dziękujemy|signature|dokument|niniejsze|przelew z rachunku|przelew na rachunek|nazwa banku|dane\s+(?:nadawcy|odbiorcy|kontrahenta)|strona\s+\d|\*{3}|-{5,}|\.{5,})|\n\s*\n|\Z)'
+      - '\b(?:opis|szczegóły płatności)\b\s*:?[^\w\n]*\n?\s*(\w.*?)(?=\n\s*(?:identyfikator|zrealizowano|typ operacji|kanał|numer|nr\b|status|waluta|opłata|prowizja|tryb|z poważaniem|bank nie|w razie|potwierdzenie ma|dział|data|kwota|wartość|godz|dziękujemy|signature|dokument|niniejsze|przelew z rachunku|przelew na rachunek|nazwa banku|dane\s+(?:nadawcy|odbiorcy|kontrahenta)|strona\s+\d|\*{3}|-{5,}|\.{5,})|\n\s*\n|\Z)'
+    flagi: [dotall]
+    zamien: [['^[^\w]+', ''], ['(?:\s+[^\w\s]+)+$', '']]   # śmieci OCR na początku i końcu
+    typ: tekst

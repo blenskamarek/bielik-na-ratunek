@@ -1,0 +1,13 @@
+# Pola potwierdzenia przelewu, które model może uzupełnić, gdy reguły ich nie znalazły.
+opis_dokumentu: Potwierdzenie wykonania przelewu bankowego (np. wpis od odwołania lub opłata skarbowa).
+
+fragmenty:
+  - {od: '\A', znakow: 5000}
+
+pola:
+  przelew_bankowy.data_operacji: {typ: data, opis: Data wykonania operacji (nie data wydruku).}
+  przelew_bankowy.kwota: {typ: kwota, opis: Kwota przelewu.}
+  przelew_bankowy.z_rachunku: {typ: cyfry, dlugosc: 26, opis: Numer rachunku nadawcy (26 cyfr, bez PL).}
+  przelew_bankowy.na_rachunek: {typ: cyfry, dlugosc: 26, opis: Numer rachunku odbiorcy (26 cyfr, bez PL).}
+  przelew_bankowy.numer_transakcji: {typ: tekst, opis: Numer referencyjny / identyfikator transakcji.}
+  przelew_bankowy.tytul: {typ: tekst, opis: Tytuł przelewu, dosłownie.}

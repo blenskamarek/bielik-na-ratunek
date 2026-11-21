@@ -1,0 +1,40 @@
+# Konfiguracja modelu językowego (warstwa uzupełniająca reguły).
+# Model wypełnia TYLKO pola puste po regułach; każdą wartość program sprawdza w tekście.
+# Wyłączenie: wlaczony: false, zmienna LLM_WYLACZ=1 albo `python run.py --bez-llm`.
+
+wlaczony: true
+
+# USTAWIENIE DLA OCENY: Bielik 11B v3.1 (otwarty model, SpeakLeash) przez kolejkę na serwerze w Polsce
+# (cal.pl, bielik.kowale.edu.pl). Program sędziego tylko wysyła zadania i odbiera wyniki przez HTTPS;
+# model liczy pracownik na komputerze z GPU (docs/ZDALNY_BIELIK.md). Klucz: plik llm.klucz obok run.bat.
+# Gdy pracownik nie działa, program wykrywa to w <= 20 s i pracuje na samych regułach + OCR.
+#
+# tryb: kolejka  -> adres = .../kolejka.php (serwer_kolejki/kolejka.php)
+# tryb: api      -> bezpośrednio do API zgodnego z OpenAI (lokalna Ollama, bramka, dostawca); adres = .../v1
+# Praca lokalna bez edycji pliku (komputer z Ollamą):
+#   $env:LLM_TRYB="api"; $env:LLM_ADRES="http://localhost:11434/v1"
+tryb: kolejka
+adres: https://bielik.kowale.edu.pl/kolejka.php
+odstep_odpytywania_s: 0.5   # tryb kolejka: co ile pytać o wynik
+limit_czekania_s: 20        # tryb kolejka: zadanie niepodjęte po tym czasie = komputer z modelem wyłączony
+
+# Model: w trybie kolejka wybiera go pracownik (--model), w trybie api - to pole.
+# Lokalnie: Bielik 11B v3.1 z kontekstem 6144 (narzedzia/modelfile/bielik-11b-6k.Modelfile),
+# bo Ollama przez API zgodne z OpenAI nie pozwala ustawić num_ctx (domyślnie 4096).
+model: bielik-11b-6k
+
+# Klucz API: zmienna środowiskowa (pierwszeństwo) albo plik obok tego pliku (poza gitem).
+klucz_zmienna: LLM_API_KEY
+klucz_plik: llm.klucz
+
+temperatura: 0
+ziarno: 0
+max_tokenow: 800          # odpowiedź dla pełnego odwołania to ok. 300-400 tokenów
+kontekst_tokenow: 6144    # rozmiar kontekstu modelu pracownika (prompt + odpowiedź muszą się zmieścić)
+znakow_na_token: 1.5      # zmierzone: polski tekst ~1.6 znaku/token (Bielik), z zapasem
+tryb_json: false           # response_format = json_object (Ollama + Bielik: błąd 400 samplera,
+                           # więc wyłączone; JSON i tak wyciągamy z odpowiedzi)
+limit_czasu_s: 180         # maks. czas na wynik jednego zadania
+prog_wylaczenia: 2         # tyle nieudanych połączeń z rzędu wyłącza LLM do końca przebiegu
+max_znakow_wejscia: 6000   # górny limit fragmentu dokumentu (budżet liczony też z kontekstu)
+cache: .cache_llm          # odpowiedzi zapisywane: powtórny przebieg nie zużywa tokenów
