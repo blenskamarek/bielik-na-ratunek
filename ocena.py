@@ -23,6 +23,9 @@ ZAŁOŻENIA (organizator nie opisał liczenia F1 — do potwierdzenia):
     cyfry w KRS/NIP/PESEL/REGON/rachunkach bez spacji. --scisle ją wyłącza.
  6. F1 mikro (sumowane TP/FP/FN) — ogółem, per pole (ścieżka bez indeksów)
     i per typ dokumentu. Podawane też F1 makro po zestawach.
+ 7. Rachunki: organizator (21.11) – zapis bez spacji, z kodem kraju (PL), jeśli jest w dokumencie.
+    Wzorce 60 zestawów treningowych UZP usuwają "PL", wzorce skanów go zachowują.
+    --bez-kodu-kraju porównuje rachunki bez kodu kraju (do pomiaru na wzorcach treningowych).
 """
 from __future__ import annotations
 
@@ -44,6 +47,7 @@ NAZWY_WYNIKU = {
 
 
 NAZWA_WZORCA = {"potwierdzenie_przelewu": "przelew"}   # stary układ: nazwa PDF -> nazwa JSON-a wzorca
+USTAWIENIA = {"bez_kodu_kraju": False}                 # --bez-kodu-kraju (patrz założenie 7)
 
 
 def typ_wzorca(wz) -> str | None:
@@ -78,7 +82,8 @@ def normalizuj(v, scisle: bool):
     if re.fullmatch(r"[\d\s]+", s):          # identyfikatory liczbowe (PESEL, KRS...)
         return s.replace(" ", "")
     if re.fullmatch(r"[a-z]{0,2}[\d ]{10,}", s):  # rachunek z prefiksem PL/spacjami
-        return s.replace(" ", "")
+        s = s.replace(" ", "")
+        return re.sub(r"^[a-z]{2}", "", s) if USTAWIENIA["bez_kodu_kraju"] else s
     return s
 
 
@@ -171,7 +176,10 @@ def main(argv=None):
     ap.add_argument("--scisle", action="store_true", help="porównanie dokładne, bez normalizacji")
     ap.add_argument("--zestawy", nargs="*", help="ogranicz do podanych zestawów")
     ap.add_argument("--pola", action="store_true", help="wypisz F1 per pole")
+    ap.add_argument("--bez-kodu-kraju", action="store_true",
+                    help="rachunki porównywane bez kodu kraju (wzorce treningowe UZP usuwają PL)")
     a = ap.parse_args(argv)
+    USTAWIENIA["bez_kodu_kraju"] = a.bez_kodu_kraju
 
     # Każdy PDF we wzorcu (rekurencyjnie): wzorzec = JSON o tej samej nazwie (skany: 0001.pdf/0001.json,
     # sprawy: odwolanie.pdf/odwolanie.json); stary układ: potwierdzenie_przelewu.pdf -> przelew.json.

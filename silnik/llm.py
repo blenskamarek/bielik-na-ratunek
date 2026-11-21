@@ -29,9 +29,9 @@ from typing import Any
 import yaml
 
 from silnik.konfig import MAKRA, BladKonfiguracji, sprawdz_walidacje, waliduj
-from silnik.narzedzia import WZ_DATA, data_iso, kwota
+from silnik.narzedzia import WZ_DATA, data_iso, kwota, rachunek
 
-TYPY_POL = {"tekst", "data", "cyfry", "email", "kwota", "wybor", "osoba", "lista"}
+TYPY_POL = {"tekst", "data", "cyfry", "rachunek", "email", "kwota", "wybor", "osoba", "lista"}
 
 
 def sprawdz_konfiguracje_llm(konf: dict, sciezka: str = "llm.pola") -> None:
@@ -156,6 +156,15 @@ class Weryfikator:
                 return None, "zła długość"
             wz = r"[\s\-]?".join(c)                # dopuszcza spacje/myślniki między cyframi
             return (c, None) if re.search(rf"(?<!\d){wz}(?!\d)", self.tekst) else (None, "brak w tekście")
+        if typ == "rachunek":
+            # model wskazuje numer; postać (kod kraju czy nie) bierzemy z tekstu dokumentu, nie od modelu
+            v = rachunek(w)
+            if not v:
+                return None, "to nie jest numer rachunku"
+            rdzen = v[2:] if v[:2].isalpha() else v
+            wz = r"[\s\-]?".join(map(re.escape, rdzen))
+            m = re.search(rf"(?<![0-9A-Za-z])(?:((?-i:[A-Z]{{2}}))[\s\-]?)?{wz}(?![0-9A-Za-z])", self.tekst)
+            return (rachunek((m.group(1) or "") + rdzen), None) if m else (None, "brak w tekście")
         if typ == "kwota":
             k = kwota(w)
             return (k, None) if k in self.kwoty else (None, "brak tej kwoty w tekście")
@@ -226,7 +235,8 @@ def _opis_pola(nazwa: str, spec: dict, wciecie: str = "") -> list[str]:
         for n, s in spec["element"].items():
             linie += _opis_pola(n, s, wciecie + "    ")
         return linie
-    format_ = {"data": " Format RRRR-MM-DD.", "cyfry": " Same cyfry.", "kwota": " Liczba."}.get(spec.get("typ"), "")
+    format_ = {"data": " Format RRRR-MM-DD.", "cyfry": " Same cyfry.", "kwota": " Liczba.",
+               "rachunek": " Numer rachunku tak jak w tekście."}.get(spec.get("typ"), "")
     opis = f'{wciecie}- "{nazwa}": {spec.get("opis", "")}{format_}'
     if spec.get("typ") == "wybor":
         w = spec.get("wartosci", {})

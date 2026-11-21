@@ -47,6 +47,30 @@ class TestNarzedzia(unittest.TestCase):
     def test_rachunek(self):
         self.assertEqual(tylko_cyfry_rachunku("PL66 2111 8080 1009 8828 5708 1733"), "66211180801009882857081733")
 
+    def test_rachunek_z_kodem_kraju(self):
+        # organizator (21.11): bez spacji, z kodem kraju, jeśli jest w dokumencie; inaczej same cyfry
+        from silnik.konfig import ekstrahuj
+        from silnik.narzedzia import rachunek
+        self.assertEqual(rachunek("PL05 4706 8028 7581 5397 2145 5024"), "PL05470680287581539721455024")
+        self.assertEqual(rachunek("05 4706 8028 7581 5397 2145 5024"), "05470680287581539721455024")
+        self.assertEqual(rachunek("DE89 3704 0044 0532 0130 00"), "DE89370400440532013000")
+        self.assertIsNone(rachunek("05 4706 8028"))
+        konf = {"pola": {"z": {"regex": "z rachunku:? ({RACHUNEK})", "typ": "rachunek"},
+                         "na": {"regex": "na rachunek:? ({RACHUNEK})", "typ": "rachunek"}}}
+        tekst = ("z rachunku: DE89 3704 0044 0532 0130 00 Data operacji\n"
+                 "na rachunek: PL05 4706 8028 7581 5397 2145 5024\n")
+        self.assertEqual(ekstrahuj(tekst, konf), {"z": "DE89370400440532013000", "na": "PL05470680287581539721455024"})
+        tekst2 = "z rachunku: 61 1090 1014 0000 0712 1981 2874, na rachunek: 05470680287581539721455024"
+        self.assertEqual(ekstrahuj(tekst2, konf), {"z": "61109010140000071219812874", "na": "05470680287581539721455024"})
+
+    def test_rachunek_od_modelu_z_kodem_kraju_z_tekstu(self):
+        from silnik.llm import Weryfikator
+        w = Weryfikator("Rachunek odbiorcy: PL05 4706 8028 7581 5397 2145 5024; nadawcy 61 1090 1014 0000 0712 1981 2874")
+        spec = {"typ": "rachunek"}
+        self.assertEqual(w.sprawdz("05470680287581539721455024", spec)[0], "PL05470680287581539721455024")  # PL z tekstu
+        self.assertEqual(w.sprawdz("PL61109010140000071219812874", spec)[0], "61109010140000071219812874")  # bez PL w tekście
+        self.assertEqual(w.sprawdz("99999999999999999999999999", spec), (None, "brak w tekście"))
+
 
 class TestOcena(unittest.TestCase):
     def test_identycznosc(self):
@@ -642,9 +666,12 @@ class TestRegresjaNaDanych(unittest.TestCase):
             self.assertGreater(negatywy, 0)
 
     def _f1_typu(self, typ):
+        # wzorce treningowe UZP usuwają "PL" z rachunków, a organizator (21.11) każe go zachować,
+        # jeśli jest w dokumencie - rachunki porównujemy więc bez kodu kraju (zapis z PL: test_rachunek_z_kodem_kraju)
         bufor = io.StringIO()
         with redirect_stdout(bufor):
-            ocena.main(["--wzorzec", str(self.we), "--wynik", str(self.wy)])
+            ocena.main(["--wzorzec", str(self.we), "--wynik", str(self.wy), "--bez-kodu-kraju"])
+        ocena.USTAWIENIA["bez_kodu_kraju"] = False
         for linia in bufor.getvalue().splitlines():
             if linia.startswith(typ):
                 return float(linia.split()[3])

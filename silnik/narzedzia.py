@@ -52,6 +52,16 @@ def tylko_cyfry_rachunku(tekst: str) -> str:
     return re.sub(r"\D", "", re.sub(r"^\s*PL", "", tekst.strip(), flags=re.IGNORECASE))
 
 
+def rachunek(tekst: str) -> str | None:
+    """Numer rachunku do JSON-a: bez spacji, z kodem kraju tylko wtedy, gdy stoi w dokumencie
+    (organizator: "PL05 4706 ..." -> "PL05470680287581539721455024", bez "PL" w dokumencie -> same cyfry;
+    kod może być też innego kraju). None, gdy to nie jest numer rachunku."""
+    s = re.sub(r"[\s\-]", "", str(tekst)).upper()
+    if re.fullmatch(r"(?:PL)?\d{26}", s) or re.fullmatch(r"(?!PL)[A-Z]{2}\d{2}[A-Z0-9]{11,30}", s):
+        return s
+    return None
+
+
 # ----------------------------------------------------------------------------- sumy kontrolne
 def _cyfry(wartosc) -> str:
     return re.sub(r"\D", "", str(wartosc))

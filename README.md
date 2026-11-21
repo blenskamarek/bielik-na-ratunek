@@ -87,14 +87,20 @@ wypełniają większość pól bez modelu. Szczegóły i konfiguracja: [docs/ZDA
 
 | | Wynik |
 |---|---|
-| F1 na danych treningowych UZP z warstwą tekstową (60 spraw, 180 dokumentów) | **1,000** |
-| F1 na skanach UZP (30 dokumentów, OCR), same reguły – wszystkie / odłożone 0008–0010 | **0,917** / **0,808** |
+| F1 na danych treningowych UZP z warstwą tekstową (60 spraw, 180 dokumentów) | **1,000** (rachunki porównane bez kodu kraju*) |
+| F1 na skanach UZP (30 dokumentów, OCR), same reguły – wszystkie / odłożone 0008–0010 | **0,923** / **0,808** |
 | F1 na skanach odłożonych z modelem Bielik 11B | 0,810 |
 | Realne odwołanie UZP (skan z zaczernieniami, `szablon-aplikacja`; wzorcowy JSON pusty – sprawdzone ręcznie), same reguły | 11 z 12 widocznych pól (wcześniej 5) |
 | Warianty układu nagłówka (etykieta pod danymi / adres bez „ul.” / nazwa i adres w jednej linii; z 60 dokumentów tekstowych) | 1,000 / 0,996 / 1,000 (wcześniej 0,61 / 0,59 / 0,63) |
 | Dokumenty negatywne UZP (16) | 16/16 `{}` |
 | Klasyfikacja (180 tekstowych + 30 skanów + realny skan UZP; 16 negatywów) | 211/211, 16/16 |
 | Czas: 196 PDF-ów tekstowych, same reguły | ~9 s |
+
+\* Numery rachunków zapisujemy tak, jak ustalił organizator (Discord, 21.11): bez spacji, z kodem kraju (np. `PL`),
+jeśli stoi w dokumencie, a bez kodu – same cyfry. Wzorce 60 zestawów treningowych usuwają `PL`, więc przy ścisłym
+porównaniu F1 na danych tekstowych wynosi 0,953 (różnią się wyłącznie rachunki z `PL`). Wzorce skanów `PL` zachowują.
+Gdyby ocena wymagała zapisu bez kodu, wystarczy w `typy/przelew/typ.yaml` dopisać do obu rachunków
+`zamien: [['^\s*PL', '']]` (bez zmian w kodzie). Porównanie bez kodu: `ocena.py ... --bez-kodu-kraju`.
 
 Skany: reguły rozwijane na zestawach 0001–0007 każdego typu, 0008–0010 odłożone do uczciwego pomiaru
 (przed rozwinięciem reguł pod skany F1 na wszystkich 30 skanach wynosiło 0,385). Typowe błędy OCR

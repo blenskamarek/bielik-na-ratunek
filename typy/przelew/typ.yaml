@@ -9,13 +9,14 @@ klasyfikacja:
   ogranicz_do_znakow: 100000
 
 pola:
-  # Rachunki: pierwszy numer NRB po słowie wskazującym rolę (nadawca / odbiorca).
+  # Rachunki: pierwszy numer po słowie wskazującym rolę (nadawca / odbiorca). Zapis wg organizatora:
+  # bez spacji, z kodem kraju (PL...) tylko wtedy, gdy stoi w dokumencie.
   przelew_bankowy.z_rachunku:
     regex: '(?:płatnik|nadawc|zleceniodawc|z rachunku|obciąż)[\s\S]{0,400}?({RACHUNEK})'
     typ: rachunek
-    # NRB = 26 cyfr; sumy kontrolnej (suma_kontrolna: rachunek) nie włączamy - rachunki w danych UZP
-    # są fikcyjne i ponad połowa jej nie przechodzi
-    walidacja: {dlugosc: 26}
+    # NRB (26 cyfr, z PL albo bez) albo IBAN innego kraju; sumy kontrolnej (suma_kontrolna: rachunek)
+    # nie włączamy - rachunki w danych UZP są fikcyjne i ponad połowa jej nie przechodzi
+    walidacja: {wzorzec: '(?:PL)?\d{26}|[A-Z]{2}\d{2}[A-Z0-9]{11,30}'}
 
   przelew_bankowy.na_rachunek:
     regex:
@@ -23,7 +24,7 @@ pola:
       - 'nadawc[\s\S]{0,60}?odbiorc[\s\S]{0,400}?{RACHUNEK}[\s\S]{0,300}?({RACHUNEK})'
       - '(?:beneficjent|odbiorc|adresat|kontrahent|na rachunek|uznawan)[\s\S]{0,400}?({RACHUNEK})'
     typ: rachunek
-    walidacja: {dlugosc: 26}
+    walidacja: {wzorzec: '(?:PL)?\d{26}|[A-Z]{2}\d{2}[A-Z0-9]{11,30}'}
 
   przelew_bankowy.kwota:
     regex:

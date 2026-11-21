@@ -40,11 +40,14 @@ import re
 from functools import lru_cache
 from typing import Any
 
-from silnik.narzedzia import SUMY_KONTROLNE, WZ_DATA, data_iso, kwota, tylko_cyfry_rachunku
+from silnik.narzedzia import SUMY_KONTROLNE, WZ_DATA, data_iso, kwota, rachunek
 
 MAKRA = {
     "DATA": WZ_DATA.pattern,
-    "RACHUNEK": r"(?:PL)?\s?(?:\d\s?){26}",
+    # NRB (26 cyfr, z "PL" albo bez, ze spacjami albo bez) albo IBAN innego kraju (kod + grupy po 4 znaki)
+    # (kod kraju nie może stać w środku dłuższego ciągu, np. numeru transakcji "CEN2603...")
+    "RACHUNEK": r"(?:(?:PL)?\s?(?:\d\s?){26}|(?<![A-Za-z0-9])(?-i:(?!PL)[A-Z]{2}\d{2})(?: ?(?-i:[A-Z0-9]{4})){2,7}"
+                r"(?: ?(?-i:[A-Z0-9]{1,3}))?(?![A-Za-z0-9]))",
     "KWOTA": r"\d[\d ]*[.,]\d{2}",
 }
 FLAGI = {"ignorecase": re.IGNORECASE, "multiline": re.MULTILINE, "dotall": re.DOTALL}
@@ -95,9 +98,8 @@ def normalizuj(wartosc: str | None, typ: str | None) -> Any:
     if typ == "cyfry":
         c = re.sub(r"\D", "", w)
         return c or None
-    if typ == "rachunek":
-        c = tylko_cyfry_rachunku(w)
-        return c if len(c) == 26 else None
+    if typ == "rachunek":                       # bez spacji; kod kraju (PL) tylko, gdy jest w dokumencie
+        return rachunek(w)
     if typ == "bool":
         return w.casefold() in {"tak", "1", "true"}
     raise BladKonfiguracji(f"nieznany typ wartości: {typ}")

@@ -61,7 +61,7 @@ Klucz = ścieżka w wynikowym JSON (kropka = zagnieżdżenie), np. `faktura.nume
 |---|---|
 | `regex` | wzorzec albo lista wzorców (pierwszy pasujący wygrywa). Pisać w `'pojedynczych cudzysłowach'`, bo w YAML wtedy `\d` działa bez podwajania. |
 | `grupa` | numer lub nazwa grupy z wartością (domyślnie 1, a bez grup całe dopasowanie) |
-| `typ` | `tekst` (domyślny) \| `data` (→ RRRR-MM-DD) \| `kwota` (→ liczba) \| `liczba` \| `cyfry` \| `rachunek` (26 cyfr) \| `bool` |
+| `typ` | `tekst` (domyślny) \| `data` (→ RRRR-MM-DD) \| `kwota` (→ liczba) \| `liczba` \| `cyfry` \| `rachunek` (bez spacji; kod kraju, np. `PL`, tylko gdy jest w dokumencie) \| `bool` |
 | `flagi` | `[dotall]`, gdy wartość ciągnie się przez kilka linii; `ignorecase` i `multiline` są włączone zawsze |
 | `wszystkie: true` | lista wszystkich trafień (bez powtórzeń) |
 | `szukaj_w: plaski` | szukanie w tekście z liniami sklejonymi spacją |
@@ -101,7 +101,7 @@ numery są fikcyjne: sumę przechodzi ok. 2/3 NIP-ów i REGON-ów i mniej niż p
 konkursowe sprawdzają tylko długość i format, a sumę kontrolną – wyłącznie PESEL (w danych wszystkie poprawne).
 
 Makra w regexach: `{DATA}` (2026-03-21, 21.03.2026, 21/03/2026, 21 marca 2026), `{KWOTA}` (1 200,50),
-`{RACHUNEK}` (NRB z PL i spacjami lub bez). Wielkość liter jest ignorowana; `(?-i:...)` włącza ją lokalnie
+`{RACHUNEK}` (NRB z PL lub bez, ze spacjami lub bez; IBAN innego kraju). Wielkość liter jest ignorowana; `(?-i:...)` włącza ją lokalnie
 (np. `(?-i:[A-ZŁ])` = tylko wielka litera).
 
 Uwaga: `{DATA}` ma własne grupy. Jeśli makro stoi w regexie **przed** grupą z wartością (np. w warunku
@@ -181,7 +181,7 @@ dokumentu, a niepotwierdzona wartość jest odrzucana (widać to w `sprawdz` i w
 |---|---|
 | `opis_dokumentu` | jedno zdanie dla modelu: czym jest dokument |
 | `fragmenty` | które części tekstu dostaje model: `[{od: '<regex>', znakow: N}, ...]` (kontekst jest ograniczony, więc warto podać okna wokół potrzebnych sekcji) |
-| `pola.<ścieżka>.typ` | `tekst` (dosłowny cytat) \| `data` \| `cyfry` (+ `dlugosc`) \| `email` \| `kwota` \| `osoba` (imię i nazwisko, pierwsza osoba z listy) \| `wybor` (+ `wartosci`) \| `lista` (+ `element`, `max`) |
+| `pola.<ścieżka>.typ` | `tekst` (dosłowny cytat) \| `data` \| `cyfry` (+ `dlugosc`) \| `rachunek` (kod kraju bierze program z tekstu) \| `email` \| `kwota` \| `osoba` (imię i nazwisko, pierwsza osoba z listy) \| `wybor` (+ `wartosci`) \| `lista` (+ `element`, `max`) |
 | `pola.<ścieżka>.opis` | czego szukać – konkretnie, z nazwą etykiety z dokumentu |
 | `wartosci` | dla `wybor`: lista albo słownik `numer: opis`; `opis_do: ścieżka` wpisze opis wybranego numeru |
 | `tylko_gdy_wiele` | w elemencie listy: pole zerowane, gdy lista ma 1 element (np. „lider”) |

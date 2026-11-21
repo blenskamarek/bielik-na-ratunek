@@ -7,7 +7,8 @@ fragmenty:
 pola:
   przelew_bankowy.data_operacji: {typ: data, opis: Data wykonania operacji (nie data wydruku).}
   przelew_bankowy.kwota: {typ: kwota, opis: Kwota przelewu.}
-  przelew_bankowy.z_rachunku: {typ: cyfry, dlugosc: 26, opis: Numer rachunku nadawcy (26 cyfr, bez PL).}
-  przelew_bankowy.na_rachunek: {typ: cyfry, dlugosc: 26, opis: Numer rachunku odbiorcy (26 cyfr, bez PL).}
+  # typ rachunek: zapis bez spacji, kod kraju (PL) tylko gdy jest w dokumencie - ustala go program z tekstu
+  przelew_bankowy.z_rachunku: {typ: rachunek, opis: Numer rachunku nadawcy.}
+  przelew_bankowy.na_rachunek: {typ: rachunek, opis: Numer rachunku odbiorcy.}
   przelew_bankowy.numer_transakcji: {typ: tekst, opis: Numer referencyjny / identyfikator transakcji.}
   przelew_bankowy.tytul: {typ: tekst, opis: Tytuł przelewu, dosłownie.}
