@@ -6,7 +6,7 @@ czyścimy wszystkie pola z typy/<typ>/llm.yaml i każemy modelowi wypełnić je 
 
 Użycie:
   python narzedzia/porownaj_llm.py --model SpeakLeash/bielik-11b-v3.1-instruct:Q4_K_M --zestawy 51-60
-  python narzedzia/porownaj_llm.py --model bielik-4.5b-cpu --typ pelnomocnictwo --zestawy 51-55
+  python narzedzia/porownaj_llm.py --model SpeakLeash/bielik-4.5b-v3.0-instruct:Q8_0 --typ pelnomocnictwo --zestawy 51-55
 """
 from __future__ import annotations
 

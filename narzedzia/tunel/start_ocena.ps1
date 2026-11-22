@@ -2,18 +2,17 @@
 Start usług na czas oceny (na naszym komputerze z GPU):
   1. sprawdza Ollamę i wariant modelu (tworzy go z Modelfile, jeśli brak),
   2. wczytuje model do pamięci na stałe (keep_alive = -1, bez zmiany ustawień Ollamy),
-  3. uruchamia bramkę z kluczem (narzedzia/bramka_llm.py) - blokuje uśpienie systemu, dopóki działa,
-  4. opcjonalnie uruchamia nazwany tunel Cloudflare,
-  5. pokazuje stan /zdrowie.
-Użycie:
-  powershell -ExecutionPolicy Bypass -File narzedzia\tunel\start_ocena.ps1 -Tunel bielik
+  3. z -Kolejka: uruchamia pracownika kolejki (narzedzia/pracownik_kolejki.py) i czeka, aż kolejka go zobaczy;
+     bez -Kolejka: uruchamia lokalnie bramkę z kluczem (narzedzia/bramka_llm.py),
+  4. pokazuje stan. Oba procesy blokują uśpienie systemu, dopóki działają.
+Użycie (ocena):
+  powershell -ExecutionPolicy Bypass -File narzedzia\tunel\start_ocena.ps1 -Kolejka https://bielik.kowale.edu.pl/kolejka.php
 Logi: narzedzia\tunel\logi\
 #>
 param(
     [string]$Model = "bielik-11b-6k",
     [int]$Port = 8080,
-    [string]$Tunel = "",         # nazwa tunelu cloudflared; puste = bez tunelu (test lokalny)
-    [string]$Kolejka = ""        # adres kolejka.php na hostingu: zamiast bramki i tunelu startuje pracownik
+    [string]$Kolejka = ""        # adres kolejka.php na hostingu: zamiast bramki startuje pracownik
 )
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path "$PSScriptRoot\..\..").Path
@@ -43,7 +42,7 @@ Write-Host "Wczytuję model do pamięci ..."
 $cialo = @{ model = $Model; prompt = "ok"; stream = $false; keep_alive = -1; options = @{ num_predict = 1 } } | ConvertTo-Json
 Invoke-RestMethod "http://127.0.0.1:11434/api/generate" -Method Post -Body $cialo -ContentType "application/json" -TimeoutSec 300 | Out-Null
 
-# 3a. Tryb kolejki na hostingu: tylko pracownik (połączenia wychodzące), bez bramki i tunelu
+# 3a. Tryb kolejki na hostingu: tylko pracownik (połączenia wychodzące), bez bramki
 if ($Kolejka) {
     if (-not (Test-Path (Join-Path $root "narzedzia\pracownik.klucz"))) {
         Write-Host "BŁĄD: brak klucza pracownika. Utwórz: py narzedzia\pracownik_kolejki.py --nowe-klucze"; exit 1
@@ -76,15 +75,7 @@ if (Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyCon
         -RedirectStandardOutput (Join-Path $logi "bramka.out")
 }
 
-# 4. Tunel
-if ($Tunel) {
-    $cf = Find-Exe "cloudflared" @("${env:ProgramFiles(x86)}\cloudflared\cloudflared.exe", "$env:ProgramFiles\cloudflared\cloudflared.exe")
-    if (-not $cf) { Write-Host "BŁĄD: brak cloudflared."; exit 1 }
-    Start-Process $cf -ArgumentList "tunnel run $Tunel" -WindowStyle Hidden `
-        -RedirectStandardError (Join-Path $logi "tunel.log") -RedirectStandardOutput (Join-Path $logi "tunel.out")
-}
-
-# 5. Stan
+# 4. Stan
 for ($i = 0; $i -lt 20; $i++) {
     try { $z = Invoke-RestMethod "http://127.0.0.1:$Port/zdrowie" -TimeoutSec 3; break } catch { Start-Sleep -Milliseconds 500 }
 }

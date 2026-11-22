@@ -111,10 +111,3 @@ FAQ: rozwiązanie „powinno zawierać klucz API”, a repozytorium na GitHubie 
 | Kilka zadań naraz (sędzia równolegle) | kolejka, dłuższe czekanie | zadania liczone po kolei; limit 180 s na wynik |
 | Wyciek klucza klienta | obce zadania dla naszego GPU | klucz tylko na ocenę; model wymuszony przez pracownika; log zadań |
 | Treść dokumentów na hostingu | dane osobowe na serwerze w PL | usuwane zaraz po odbiorze wyniku, najpóźniej po 15 min; katalog zablokowany dla WWW |
-
-## Wariant alternatywny: bramka + tunel
-
-Gdyby hosting zawiódł: `narzedzia/bramka_llm.py` (bramka z kluczem przed Ollamą) + nazwany tunel HTTPS
-(Cloudflare z domeną przeniesioną do Cloudflare albo Tailscale Funnel). Start: `start_ocena.ps1 -Tunel <nazwa>`,
-w `llm.yaml`: `tryb: api`, `adres: https://<adres-tunelu>/v1`. Szablon tunelu: `narzedzia/tunel/config.yml.wzor`.
-Uwaga: Cloudflare (plan darmowy) zrywa zapytania dłuższe niż 100 s, a ruch przechodzi przez serwery spoza UE.

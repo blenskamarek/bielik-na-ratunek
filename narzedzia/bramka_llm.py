@@ -1,7 +1,7 @@
 """Bramka z kluczem API przed lokalną Ollamą (biblioteka standardowa Pythona).
 
 Po co: Ollama nie ma uwierzytelniania, więc NIE wystawiamy jej portu do internetu.
-Na zewnątrz wystawiamy tę bramkę (najlepiej przez tunel HTTPS), która:
+Na zewnątrz wystawiamy tę bramkę (przez HTTPS, np. reverse proxy w sieci urzędu), która:
   * wymaga nagłówka Authorization: Bearer <klucz> (porównanie w stałym czasie),
   * przepuszcza tylko POST /v1/chat/completions i GET /v1/models (+ GET /zdrowie bez klucza),
   * podmienia pole "model" na jeden skonfigurowany model (klient nie wybierze innego),
@@ -10,8 +10,8 @@ Na zewnątrz wystawiamy tę bramkę (najlepiej przez tunel HTTPS), która:
 
 Użycie:
   python narzedzia/bramka_llm.py --nowy-klucz                 # tworzy plik z kluczem (bramka.klucz)
-  python narzedzia/bramka_llm.py --port 8080 --model bielik-11b-8k
-Po stronie programu (u sędziego): llm.yaml -> adres: https://<adres-tunelu>/v1, klucz w pliku llm.klucz.
+  python narzedzia/bramka_llm.py --port 8080 --model bielik-11b-6k
+Po stronie programu: llm.yaml -> tryb: api, adres: https://<adres-bramki>/v1, klucz w pliku llm.klucz.
 """
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ class Bramka(BaseHTTPRequestHandler):
         return any(hmac.compare_digest(podany, k) for k in self.konf["klucze"]) if podany else False
 
     def _ip(self) -> str:
-        # za tunelem prawdziwy adres jest w nagłówku (tylko do logów)
+        # za pośrednikiem HTTPS prawdziwy adres jest w nagłówku (tylko do logów)
         return self.headers.get("CF-Connecting-IP") or self.headers.get("X-Forwarded-For") or self.client_address[0]
 
     def log_message(self, fmt, *args):            # wyłącza domyślne logi z pełnymi ścieżkami
@@ -118,7 +118,7 @@ class Bramka(BaseHTTPRequestHandler):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--host", default="127.0.0.1", help="127.0.0.1 gdy przed bramką jest tunel (zalecane)")
+    ap.add_argument("--host", default="127.0.0.1", help="127.0.0.1 gdy przed bramką jest pośrednik HTTPS (zalecane)")
     ap.add_argument("--port", type=int, default=8080)
     ap.add_argument("--cel", default="http://127.0.0.1:11434", help="adres lokalnej Ollamy")
     ap.add_argument("--model", default="bielik-11b-6k")
@@ -126,7 +126,7 @@ def main():
                     help="plik z kluczami API (jeden na linię)")
     ap.add_argument("--nowy-klucz", action="store_true", help="dopisz nowy losowy klucz do pliku i zakończ")
     ap.add_argument("--max-bajtow", type=int, default=400_000)
-    # Za tunelem Cloudflare (plan darmowy) zapytanie musi dostać odpowiedź w 100 s, inaczej HTTP 524.
+    # Pośrednicy HTTPS często zrywają zapytanie bez odpowiedzi po ~100 s (np. HTTP 524).
     # Dlatego domyślnie: czekanie w kolejce + generowanie < 100 s; zajęta kolejka -> szybkie 429.
     ap.add_argument("--limit-s", type=int, default=90, help="maks. czas jednego zapytania do modelu")
     ap.add_argument("--czekanie-s", type=int, default=45, help="maks. czas czekania w kolejce")
