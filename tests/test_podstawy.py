@@ -375,6 +375,26 @@ class TestUkladyOdwolania(unittest.TestCase):
         self.assertEqual(w["ZamowieniePubliczne"]["tytul"], "Zakup 3 mikrotomów dla Pracowni Patomorfologii")
         self.assertEqual(w["Zamawiajacy"][0]["nazwa"], "Zespół Przychodni w Katowicach")   # bez przecinka
 
+    def test_wydruk_wyroku_z_lex_nie_jest_odwolaniem(self):
+        # wydruk z bazy LEX: w nagłówku słowa "Odwołujący", "Prezes KIO", ale to wyrok
+        tekst = ("KIO 534/24, Możliwość odstąpienia - Wyrok Krajowej Izby Odwoławczej\nLEX nr 3702060\nWyrok\n"
+                 "Krajowej Izby Odwoławczej\nz dnia 6 marca 2024 r.\nKIO 534/24\n" + self.ADRESAT
+                 + "Odwołujący:\nAlfa sp. z o.o.\nul. Kwiatowa 5, 00-001 Warszawa\nODWOŁANIE\nodwołanie odwołanie\n")
+        self.assertIsNone(klasyfikuj(tekst, wczytaj_typy()))
+
+    def test_odwolanie_bez_tytulu_i_nazwa_przed_regon(self):
+        # realne pismo (PGG 2026): brak tytułu "ODWOŁANIE", adresat w mianowniku, linia strony kończy się "REGON:"
+        typy = wczytaj_typy()
+        tekst = ("Gliwice, 29 maja 2026r.\nDo\nPrezesa Krajowa Izba Odwoławcza\nul. Postępu 17A, 02-676 Warszawa\n"
+                 "Odwołujący:\nTarnoplast Sp. z o.o. z siedzibą w Tarnowie, ul. Chemiczna 156, 33-101 Tarnów, REGON:\n"
+                 "369753400, KRS 0000724117\nZamawiający:\nPolska Grupa Górnicza S.A. KRS 0000709363, NIP: 634-283-47-28\n"
+                 "W imieniu Odwołującego wnoszę o uwzględnienie odwołania.\n")
+        self.assertEqual(klasyfikuj(tekst, typy), "odwolanie")
+        w = typy["odwolanie"].wynik(tekst)
+        self.assertEqual((w["OdwolanieKIO"]["data"], w["OdwolanieKIO"]["miejscowosc"]), ("2026-05-29", "Gliwice"))
+        self.assertEqual(w["Odwolujacy"][0]["nazwa"], "Tarnoplast Sp. z o.o.")
+        self.assertEqual(w["Zamawiajacy"][0]["nazwa"], "Polska Grupa Górnicza S.A.")
+
     def test_same_definicje_zostawiaja_tytul_pusty_dla_modelu(self):
         # wartość z reguły blokowałaby model (uzupełnia tylko puste pola), więc definicja nie może być tytułem
         w = self._dotyczy("Dotyczy: postępowania prowadzonego na podstawie ustawy „Prawo zamówień publicznych” "

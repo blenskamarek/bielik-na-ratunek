@@ -23,6 +23,8 @@ from pypdf import PdfReader
 from silnik import konfig, llm, ocr
 
 log = logging.getLogger("odwolania")
+# pypdf zgłasza ostrzeżenia o czcionkach (np. „fontTools is required…”) dla każdej strony - tylko szum w logu
+logging.getLogger("pypdf").setLevel(logging.ERROR)
 KATALOG_TYPOW = Path(__file__).resolve().parent.parent / "typy"
 
 
@@ -65,6 +67,10 @@ def _czytaj_tekst(sciezka: Path) -> str:
     for znak in ("\u00a0", "\u202f"):
         tekst = tekst.replace(znak, " ")
     tekst = tekst.replace("\u200b", "")
+    # PDF-y z zerowymi szeroko\u015bciami polskich znak\u00f3w w czcionce (np. CFF Type1): pypdf wstawia spacj\u0119
+    # przed nimi ("Odwo\u0142uj \u0105cy"). Litery \u0105, \u0119, \u0144 nie zaczynaj\u0105 polskiego s\u0142owa ani nazwiska, wi\u0119c
+    # pojedyncza spacja mi\u0119dzy liter\u0105 a nimi jest artefaktem odczytu (\u0107 - tak: "\u0107wier\u0107", "\u0106wik\u0142a").
+    tekst = re.sub(r"(?<=[^\W\d_]) (?=[\u0105\u0119\u0144\u0104\u0118])", "", tekst)
     return tekst
 
 

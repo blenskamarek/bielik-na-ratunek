@@ -12,12 +12,15 @@ klasyfikacja:
   # [^\w\n]{0,3}: OCR potrafi wstawić śmieć przed etykietą (np. „Odwołujący:)
   wymagane_wzorce:
     - '^[^\w\n]{0,3}(?-i:Odwo[łl]uj[ąa]c[ya]|ODWO[ŁL]UJ[ĄA]C[YA])\b'
-    - '^[^\w\n]{0,3}(?-i:O ?D ?W ?O ?[ŁL] ?A ?N ?I ?E)[^\w\n]{0,3}$|Prezes\w*\s+Krajowej\s+Izby\s+Odwo[łl]awczej'
+    - '^[^\w\n]{0,3}(?-i:O ?D ?W ?O ?[ŁL] ?A ?N ?I ?E)[^\w\n]{0,3}$|Prezes\w*\s+Krajow\w+\s+Izb\w+\s+Odwo[łl]awcz\w+'   # także „Prezesa Krajowa Izba Odwoławcza”
   okno_wzorcow: 4000
   # tytuł innego rodzaju pisma w pierwszych liniach = to nie jest odwołanie
   wykluczajace_wzorce:
     - '^[ \t]*(?-i:WYROK|POSTANOWIENIE|ROZPORZĄDZENIE|DECYZJA|UCHWAŁA|OBWIESZCZENIE)\b'
     - '^[ \t]*Sygn\.\s*akt'
+    # wydruki orzeczeń z baz prawnych (LEX, Legalis): nagłówek bazy albo samotna linia "Wyrok"
+    - '\bLEX\s+nr\s+\d+'
+    - '^[ \t]*(?-i:Wyrok|Postanowienie|Uchwała)[ \t]*$'
   okno_wykluczen: 1000
 
 # Pomocnicze fragmenty tekstu (nie trafiają do wyniku).
@@ -63,7 +66,7 @@ sekcje:
   # "dotyczy: ... pn. „tytuł” nr referencyjny ..., BZP ..., TED ..." aż do treści odwołania
   dotyczy:
     szukaj_w: plaski
-    regex: '(\bdotyczy\b.*?)(?=Działając w imieniu|(?-i:O ?D ?W ?O ?Ł ?A ?N ?I ?E)|$)'
+    regex: '\A.{0,4000}?(\bdotyczy\b.*?)(?=Działając w imieniu|(?-i:O ?D ?W ?O ?Ł ?A ?N ?I ?E)|$)'
   # czynność zaskarżona pierwszym zarzutem: 1. punkt listy zaskarżonych czynności
   pierwszy_zarzut:
     szukaj_w: plaski
@@ -87,11 +90,11 @@ sekcje:
 pola:
   # nagłówek pisma: linia "Miejscowość, dnia <data> r."
   OdwolanieKIO.data:
-    regex: '^[ \t]*[^\W\d_][\w .\-]*?,[ \t]*(?:dnia[ \t]+)?({DATA})(?:[ \t]+r(?:oku|\.))?[ \t]*$'
+    regex: '^[ \t]*[^\W\d_][\w .\-]*?,[ \t]*(?:dnia[ \t]+)?({DATA})(?:[ \t]*r(?:oku|\.))?[ \t]*$'
     typ: data
     walidacja: {zakres: ['2021-01-01', null]}    # odwołania wg Pzp z 2019 r. wnosi się od 2021 r.
   OdwolanieKIO.miejscowosc:
-    regex: '^[ \t]*([^\W\d_][\w .\-]*?),[ \t]*(?:dnia[ \t]+)?(?:{DATA})(?:[ \t]+r(?:oku|\.))?[ \t]*$'
+    regex: '^[ \t]*([^\W\d_][\w .\-]*?),[ \t]*(?:dnia[ \t]+)?(?:{DATA})(?:[ \t]*r(?:oku|\.))?[ \t]*$'
   OdwolanieKIO.czynnosc_dzien:
     w: [pierwszy_zarzut, zdanie_czynnosc]
     regex: '({DATA})'
@@ -175,7 +178,7 @@ listy:
       # prawną: "odpowiedzialnością", "Sp. z o.o."); nazwa kończy się też na ", ul." / ", 00-000" /
       # "z siedzibą" / "KRS|NIP|REGON", gdy nazwa i adres są w jednej linii. Bez wymogu linii "ul.".
       - w: odwolujacy_po
-        regex: &blok_luzny '\A\s*(?:(?:\d\)[ \t]*)?(?:Konsorcj|Wykonawc|Zamawiając|Odwołując|Lider|Partner)[\s\S]*?:[ \t]*\n\s*|[^\n]*:[ \t]*\n\s*)*[^\w\n]{0,4}(?:\d\)[ \t]*)?(?P<nazwa>(?:[^\n]|\n(?=[^\w\n]{0,2}(?-i:[a-ząćęłńóśźż]|Sp(?:ółk|\.|\s)|S\.\s?A\b))(?![^\w\n]{0,2}(?:(?:ul|al|pl|os|tel|lok)\.|e-?mail|kontakt|reprezentowan|adres|tel\b))(?![^\n]*(?:@|\b\d{2}-\d{3}\b|\b(?:KRS|NIP|REGON)\b)))+?)(?=[ \t]*,[ \t]*(?:ul|al|pl|os)\.\s|,?[ \t]+z[ \t]+siedzib|[ \t]*,[ \t]*\d{2}-\d{3}\b|[ \t]*[,;(][ \t]*(?:KRS|NIP|REGON)\b|[ \t]*\n(?!(?=[^\w\n]{0,2}(?-i:[a-ząćęłńóśźż]|Sp(?:ółk|\.|\s)|S\.\s?A\b))(?![^\w\n]{0,2}(?:(?:ul|al|pl|os|tel|lok)\.|e-?mail|kontakt|reprezentowan|adres|tel\b))(?![^\n]*(?:@|\b\d{2}-\d{3}\b|\b(?:KRS|NIP|REGON)\b)))|[ \t]*\Z)(?P<ids>[\s\S]*)'
+        regex: &blok_luzny '\A\s*(?:(?:\d\)[ \t]*)?(?:Konsorcj|Wykonawc|Zamawiając|Odwołując|Lider|Partner)[\s\S]*?:[ \t]*\n\s*|[^\n\d]{0,60}:[ \t]*\n\s*)*[^\w\n]{0,4}(?:\d\)[ \t]*)?(?P<nazwa>(?:[^\n]|\n(?=[^\w\n]{0,2}(?-i:[a-ząćęłńóśźż]|Sp(?:ółk|\.|\s)|S\.\s?A\b))(?![^\w\n]{0,2}(?:(?:ul|al|pl|os|tel|lok)\.|e-?mail|kontakt|reprezentowan|adres|tel\b))(?![^\n]*(?:@|\b\d{2}-\d{3}\b|\b(?:KRS|NIP|REGON)\b)))+?)(?=[ \t]*,[ \t]*(?:ul|al|pl|os)\.\s|,?[ \t]+z[ \t]+siedzib|[ \t]*,[ \t]*\d{2}-\d{3}\b|[ \t]*[,;(]?[ \t]*(?:KRS|NIP|REGON)\b|[ \t]*\n(?!(?=[^\w\n]{0,2}(?-i:[a-ząćęłńóśźż]|Sp(?:ółk|\.|\s)|S\.\s?A\b))(?![^\w\n]{0,2}(?:(?:ul|al|pl|os|tel|lok)\.|e-?mail|kontakt|reprezentowan|adres|tel\b))(?![^\n]*(?:@|\b\d{2}-\d{3}\b|\b(?:KRS|NIP|REGON)\b)))|[ \t]*\Z)(?P<ids>[\s\S]*)'
       # 2) zwykły układ: etykieta nad blokiem, adres w osobnej linii "ul./al./pl./os."
       - w: odwolujacy
         regex: &blok_strony '(?:^[^\w\n]{0,3}(?P<etykieta>[^\n]*:)[ \t]*\n)?^[^\w\n]{0,4}(?:\d\)[ \t]*)?(?P<nazwa>(?![^\w\n]{0,4}(?:ul|al|pl|os)\.\s)(?![^\w\n]{0,4}(?:Zamawiając|Odwołując|Wykonawc|Konsorcjum|Lider|Partner|reprezentowan|adres do|tel\.|e-?mail))(?![^\n]*:[ \t]*$)(?![^\n]*(?:\b(?:KRS|NIP|REGON)\b|@|Izby\s+Odwo))[^\n]*\w[^\n]*(?:\n(?![^\w\n]{0,4}(?:ul|al|pl|os)\.\s)(?![^\n]*(?:\b(?:KRS|NIP|REGON)\b|e-?mail|\btel\.|\b\d{2}-\d{3}\b|:[ \t]*$))[^\n]*\w[^\n]*){0,2})[ \t]*\n^[^\w\n]{0,4}(?:ul|al|pl|os)\.\s[^\n]*(?:\n|\Z)(?:^(?![^\n]*\b(?:KRS|NIP|REGON)\b)[^\n]*\b\d{2}-\d{3}\b[^\n]*(?:\n|\Z))?(?P<ids>(?:^[^\n]*\b(?:KRS|NIP|REGON)\b[^\n]*(?:\n|\Z))*)(?:^[^\n]*e-?mail[^\n]*(?:\n|\Z))?(?P<dopisek>^[^\w\n]{0,4}Zamawiający\s+prowadząc[^\n]*)?'

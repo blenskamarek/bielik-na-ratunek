@@ -320,7 +320,15 @@ def _wyslij_kolejka(k: dict, tresc: dict, naglowki: dict) -> dict:
     odstep = float(k.get("odstep_odpytywania_s", 0.5))
     while True:
         time.sleep(odstep)
-        st = _json_z(f"{adres}?a=wynik&id={id_zadania}", naglowki)
+        try:
+            st = _json_z(f"{adres}?a=wynik&id={id_zadania}", naglowki)
+        except urllib.error.HTTPError:
+            raise                                    # odpowiedź serwera (zły klucz itp.) - obsługa wyżej
+        except (urllib.error.URLError, OSError, ValueError) as e:
+            # chwilowy błąd sieci (np. DNS „getaddrinfo failed” na Windows) nie przerywa czekania:
+            # zadanie już jest w kolejce i pracownik może je właśnie liczyć; limity czasu niżej
+            log.debug("LLM: chwilowy błąd odpytywania kolejki (%s) — ponawiam", e)
+            st = {}
         status = st.get("status")
         if status == "gotowe":
             return st["odpowiedz"]
