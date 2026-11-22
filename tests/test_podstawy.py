@@ -352,6 +352,35 @@ class TestUkladyOdwolania(unittest.TestCase):
         self.assertEqual((w["Odwolujacy"][0]["nazwa"], w["Odwolujacy"][0]["krs"]), ("Alfa Beta sp. z o.o.", "0000123456"))
         self.assertEqual((w["Zamawiajacy"][0]["nazwa"], w["Zamawiajacy"][0]["nip"]), ("Gmina Przykładowo", "9876543210"))
 
+    # Tytuł zamówienia: cudzysłów w "dotyczy" bywa definicją pojęcia (prawdziwe odwołania z Internetu:
+    # Lipie 2026 - „ustawą Pzp” przed tytułem; ZWPS 2022 - tytuł bez cudzysłowu po "pt.", potem „postępowanie”).
+    def _dotyczy(self, dotyczy: str) -> dict:
+        typy = wczytaj_typy()
+        tekst = (self.ADRESAT + "Odwołujący:\nAlfa Beta sp. z o.o.\nul. Kwiatowa 5, 00-001 Warszawa\n"
+                 "Zamawiający:\nZespół Przychodni w Katowicach,\nul. Rynek 1, 00-002 Katowice\n" + dotyczy
+                 + "\nODWOŁANIE\nDziałając w imieniu wykonawcy Alfa Beta sp. z o.o. wnoszę odwołanie.\n")
+        self.assertEqual(klasyfikuj(tekst, typy), "odwolanie")
+        return typy["odwolanie"].wynik(tekst)
+
+    def test_tytul_po_definicjach_w_cudzyslowie(self):
+        w = self._dotyczy("Dotyczy: postępowania prowadzonego na podstawie ustawy z dnia 11 września 2019 r. Prawo "
+                          "zamówień publicznych zwanej dalej: „ustawą Pzp” lub „uPzp”, pn.: „ BUDOWA BOISKA "
+                          "WIELOFUNKCYJNEGO” Numer postępowania: ZP.271.24.2025")
+        self.assertEqual(w["ZamowieniePubliczne"]["tytul"], "BUDOWA BOISKA WIELOFUNKCYJNEGO")
+
+    def test_tytul_bez_cudzyslowu_po_pt(self):
+        w = self._dotyczy("Dotyczy: postępowania w trybie podstawowym pt. Zakup 3 mikrotomów dla Pracowni "
+                          "Patomorfologii. Numer sprawy: ZP / D / 8 / 22. Ogłoszenie nr 2022/BZP 00394256/01 "
+                          "(dalej „postępowanie”).")
+        self.assertEqual(w["ZamowieniePubliczne"]["tytul"], "Zakup 3 mikrotomów dla Pracowni Patomorfologii")
+        self.assertEqual(w["Zamawiajacy"][0]["nazwa"], "Zespół Przychodni w Katowicach")   # bez przecinka
+
+    def test_same_definicje_zostawiaja_tytul_pusty_dla_modelu(self):
+        # wartość z reguły blokowałaby model (uzupełnia tylko puste pola), więc definicja nie może być tytułem
+        w = self._dotyczy("Dotyczy: postępowania prowadzonego na podstawie ustawy „Prawo zamówień publicznych” "
+                          "(dalej „postępowanie”), zwanej dalej „ustawą Pzp”.")
+        self.assertIsNone(w["ZamowieniePubliczne"]["tytul"])
+
 
 class TestLLM(unittest.TestCase):
     """Warstwa LLM z atrapą modelu (bez sieci): co przyjmujemy, a co odrzucamy."""

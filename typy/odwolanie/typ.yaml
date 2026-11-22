@@ -155,7 +155,14 @@ pola:
     w: dotyczy
     regex:       # tytuł w cudzysłowie; w skanie bywa ",," zamiast „ albo brak otwierającego cudzysłowu
       - '„\s*([^”"„]+?)\s*[”"]'
-      - 'pn\.\s*(?:[„"“,]{1,2}\s*)?([^”"„]+?)\s*[”"]'
+      - 'pn\.:?\s*(?:[„"“,]{1,2}\s*)?([^”"„]+?)\s*[”"]'
+      # realne pisma: tytuł bez cudzysłowu po "pt." / "pn." / "pod nazwą", do kropki przed numerem sprawy
+      - '(?:\bp[nt]\.|\bpod nazwą):?\s*(?![„"“,])([^„”"“]{10,300}?)\.?\s+(?=(?:Numer|Nr|Znak|Ogłoszeni\w*|Sygn\w*)\b)'
+    # Cudzysłów w "dotyczy" bywa definicją pojęcia: zwanej dalej „ustawą Pzp”, (dalej „postępowanie”).
+    # Takie trafienie odrzucamy i szukamy dalej; bez poprawnego tytułu pole zostaje puste i uzupełnia je model.
+    # Odrzucane: jedno słowo albo termin prawny (+ do 3 słów). Bez progu długości - realne tytuły bywają krótkie.
+    walidacja:
+      wzorzec: '(?!(?:ustaw[aąyie]|prawo zamówień|specyfikacj\w*\s+warunków|zamawiając\w*|odwołując\w*|wykonawc\w*)\b(?:\s+\S+){0,3}$)\S+(?:\s+\S+)+'
 
 listy:
   # blok strony: [etykieta:] nazwa (1-3 linie, może być w linii etykiety) / adres: ulica (+ linia z kodem)
@@ -185,7 +192,7 @@ listy:
         w: [w_imieniu_po, nazwa]
         regex: '\A\s*([\s\S]+?)\s*\Z'
         # dopisek o roli w konsorcjum, cudzysłowy wokół nazwy, śmieci OCR na końcu
-        zamien: [['\s*\((?:lider|partner)[^)]*\)', ''], ['[„”“"]', ''], ['(?:\s+[^\w\s]+)+$', '']]
+        zamien: [['\s*\((?:lider|partner)[^)]*\)', ''], ['[„”“"]', ''], ['(?:\s+[^\w\s]+)+$', ''], ['[\s,;:]+$', '']]
       nip: {w: ids, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry, walidacja: {dlugosc: 10}}
       regon: {w: ids, regex: 'REGON[:\s]*((?:\d[ -]?){8}\d(?:(?:[ -]?\d){5})?)', typ: cyfry, walidacja: {dlugosc: [9, 14]}}
       przez-pelnomocnika: {w: naglowek, mapa: [[1, 'reprezentowan\w*']], domyslnie: 0}
@@ -213,7 +220,7 @@ listy:
       krs: {w: ids, regex: 'KRS[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry, walidacja: {dlugosc: 10}}
       nazwa:
         z_grupy: nazwa
-        zamien: [['(?:\s+[^\w\s]+)+$', '']]
+        zamien: [['(?:\s+[^\w\s]+)+$', ''], ['[\s,;:]+$', '']]   # śmieci OCR, przecinek po nazwie
       nip: {w: ids, regex: 'NIP[:\s]*((?:\d[ -]?){9}\d)', typ: cyfry, walidacja: {dlugosc: 10}}
       regon: {w: ids, regex: 'REGON[:\s]*((?:\d[ -]?){8}\d(?:(?:[ -]?\d){5})?)', typ: cyfry, walidacja: {dlugosc: [9, 14]}}
       # tylko przy kilku zamawiających: 1 = lider / prowadzący (etykieta przed blokiem albo dopisek po nim)

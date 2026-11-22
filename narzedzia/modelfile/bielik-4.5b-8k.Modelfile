@@ -1,3 +1,0 @@
-# Wariant lokalny do testow (kontekst 8192; -cpu = bez GPU)
-FROM SpeakLeash/bielik-4.5b-v3.0-instruct:Q8_0
-PARAMETER num_ctx 8192
