@@ -24,7 +24,7 @@ Kod: `/opt/solution/repo` (Python 3.12 w `repo/.venv`, Tesseract OCR z językiem
 
 ## Zewnętrzne usługi
 
-- **Model językowy Bielik 11B v3.1** (otwarte wagi, SpeakLeash) przez kolejkę HTTPS na serwerze w Polsce
+- **Model językowy Bielik 11B v3.1** (otwarte wagi, SpeakLeash) przez kolejkę HTTPS na serwerze w UE (centrum danych w Niemczech; model liczy w Polsce)
   (`https://bielik.kowale.edu.pl/kolejka.php`, hosting cal.pl). Klucz: `LLM_API_KEY` w `/opt/solution/.env`.
   Model uzupełnia tylko pola, których nie znalazły reguły; każdą jego wartość program sprawdza w tekście.
 - Gdy model jest niedostępny, program wykrywa to w ≤ 20 s i kończy pracę na samych regułach i OCR.

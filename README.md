@@ -65,7 +65,7 @@ PDF ─▶ tekst (pypdf) ─▶ OCR stron bez tekstu (Tesseract, pol)
 |---|---|
 | Model | **Bielik 11B v3.1 Instruct** (SpeakLeash, otwarte wagi), GGUF Q4_K_M |
 | Uruchomienie | Ollama na komputerze z GPU (RTX 5060 8 GB), kontekst 6144 tokenów |
-| Dostęp dla programu | HTTPS przez kolejkę na serwerze w Polsce (hosting cal.pl): program wrzuca zadanie, komputer z modelem sam je pobiera (tylko połączenia wychodzące) i odsyła wynik |
+| Dostęp dla programu | HTTPS przez kolejkę na serwerze w UE (polski hosting cal.pl, centrum danych w Niemczech): program wrzuca zadanie, komputer z modelem sam je pobiera (tylko połączenia wychodzące) i odsyła wynik |
 | Ustawienia | temperatura 0, stałe ziarno, odpowiedzi w pamięci podręcznej (powtórny przebieg nie zużywa tokenów) |
 | Rola | uzupełnienie pól pustych po regułach (np. strony i czynność w układzie, którego reguły nie znają), z weryfikacją w tekście |
 | Odporność | pracownik nieaktywny → wykrycie w ≤ 20 s i dalej same reguły; zły klucz → natychmiast same reguły |

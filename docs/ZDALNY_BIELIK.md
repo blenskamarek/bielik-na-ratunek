@@ -3,10 +3,10 @@
 Sędzia uruchamia program u siebie (komputer bez GPU). Reguły i OCR działają lokalnie u sędziego,
 a pola, których reguły nie znalazły, program uzupełnia modelem **Bielik 11B v3.1** działającym na
 naszym komputerze z GPU. Połączenie idzie przez **kolejkę na naszym hostingu** (cal.pl, domena
-kowale.edu.pl, serwer w Polsce).
+kowale.edu.pl; polska firma, serwer w centrum danych w Niemczech, czyli w UE).
 
 ```
-komputer sędziego                hosting cal.pl (PL)                   nasz komputer (RTX 5060)
+komputer sędziego                hosting cal.pl (UE/DE)               nasz komputer (RTX 5060)
 ┌─────────────────────┐ HTTPS ┌──────────────────────────┐ HTTPS ┌──────────────────────────┐
 │ run.py: reguły+OCR  │──────▶│ kolejka.php              │◀──────│ pracownik_kolejki.py     │
 │ LLM: wrzuć zadanie, │ klucz │ zadania = pliki JSON     │ klucz │ co 1 s: "jest zadanie?"  │
@@ -17,7 +17,7 @@ komputer sędziego                hosting cal.pl (PL)                   nasz kom
 Dlaczego tak:
 - **Nasz komputer nie przyjmuje żadnych połączeń.** Pracownik sam łączy się na zewnątrz, więc nie
   trzeba otwierać portów ani konfigurować routera. Ollama nasłuchuje tylko lokalnie.
-- **Dane idą tylko przez nasz serwer w Polsce** (bez Cloudflare/Tailscale), więc wymóg „serwer w UE” jest spełniony.
+- **Dane idą tylko przez nasz hosting w UE** (polska firma, serwer w Niemczech; bez Cloudflare/Tailscale), więc wymóg „serwer w UE” jest spełniony. Model liczy w Polsce.
 - **Hosting współdzielony wystarcza.** `kolejka.php` działa na PHP 7.0+, bez bazy danych i rozszerzeń.
   Przejęcie zadania to atomowe `rename()`, więc dwa pobrania nigdy nie wezmą tego samego zadania.
 - **Program nie traci czasu, gdy model jest niedostępny.** Przy pierwszym zapytaniu sprawdza
@@ -110,4 +110,4 @@ FAQ: rozwiązanie „powinno zawierać klucz API”, a repozytorium na GitHubie 
 | Limity lub zapora hostingu (WAF, liczba zapytań) | odrzucone zapytania | pracownik po minucie bez zadań pyta co 5 s; test `sprawdz_zdalny.ps1` przed oceną |
 | Kilka zadań naraz (sędzia równolegle) | kolejka, dłuższe czekanie | zadania liczone po kolei; limit 180 s na wynik |
 | Wyciek klucza klienta | obce zadania dla naszego GPU | klucz tylko na ocenę; model wymuszony przez pracownika; log zadań |
-| Treść dokumentów na hostingu | dane osobowe na serwerze w PL | usuwane zaraz po odbiorze wyniku, najpóźniej po 15 min; katalog zablokowany dla WWW |
+| Treść dokumentów na hostingu | dane osobowe na serwerze w UE (DE) | usuwane zaraz po odbiorze wyniku, najpóźniej po 15 min; katalog zablokowany dla WWW |

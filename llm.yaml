@@ -4,7 +4,7 @@
 
 wlaczony: true
 
-# USTAWIENIE DLA OCENY: Bielik 11B v3.1 (otwarty model, SpeakLeash) przez kolejkę na serwerze w Polsce
+# USTAWIENIE DLA OCENY: Bielik 11B v3.1 (otwarty model, SpeakLeash) przez kolejkę na serwerze w UE (cal.pl, centrum danych w Niemczech)
 # (cal.pl, bielik.kowale.edu.pl). Program sędziego tylko wysyła zadania i odbiera wyniki przez HTTPS;
 # model liczy pracownik na komputerze z GPU (docs/ZDALNY_BIELIK.md). Klucz: plik llm.klucz obok run.bat
 # (w repozytorium zawiera tylko "tutaj wpisz klucz" - wpisz w nim klucz z formularza zgłoszeniowego).
